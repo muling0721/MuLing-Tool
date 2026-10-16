@@ -12,8 +12,8 @@ android {
         applicationId "com.ncmdump.app"
         minSdk 24
         targetSdk 34
-        versionCode 23
-        versionName "1.8"
+        versionCode 24
+        versionName "1.9"
 
         externalNativeBuild {
             cmake {
@@ -25,10 +25,15 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("../release.jks")
-            storePassword "ncmdump123"
-            keyAlias "ncmdump"
-            keyPassword "ncmdump123"
+            // 优先读取环境变量（CI 通过 Secrets 注入），否则回退到本地路径/默认口令
+            def envStoreFile = System.getenv("SIGNING_KEYSTORE_FILE")
+            def envStorePass = System.getenv("SIGNING_STORE_PASSWORD")
+            def envKeyAlias = System.getenv("SIGNING_KEY_ALIAS")
+            def envKeyPass = System.getenv("SIGNING_KEY_PASSWORD")
+            storeFile file(envStoreFile ?: "../release.jks")
+            storePassword envStorePass ?: "ncmdump123"
+            keyAlias envKeyAlias ?: "ncmdump"
+            keyPassword envKeyPass ?: "ncmdump123"
         }
     }
 
