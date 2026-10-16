@@ -24,7 +24,6 @@ class PlayerActivity : AppCompatActivity() {
     private var bvid: String = ""
     private var cid: Long = 0
     private var videoTitle: String = ""
-    private var directUrl: String = ""
     private var isSaving = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +33,6 @@ class PlayerActivity : AppCompatActivity() {
         bvid = intent.getStringExtra("bvid") ?: ""
         cid = intent.getLongExtra("cid", 0)
         videoTitle = intent.getStringExtra("video_title") ?: ""
-        directUrl = intent.getStringExtra("video_url") ?: ""
 
         supportActionBar?.title = videoTitle.ifEmpty { "播放" }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -65,15 +63,6 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun loadVideo() {
-        if (directUrl.isNotEmpty()) {
-            val html = """
-                <html><head><meta name="viewport" content="width=device-width,initial-scale=1">
-                <style>html,body{margin:0;height:100%;background:#000}video{width:100%;height:100%}</style>
-                </head><body><video src="$directUrl" controls autoplay playsinline></video></body></html>
-            """.trimIndent()
-            webView.loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
-            return
-        }
         if (bvid.isEmpty() || cid == 0L) {
             Toast.makeText(this, "无效的视频参数", Toast.LENGTH_SHORT).show()
             return
@@ -84,10 +73,6 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun saveVideo() {
-        if (directUrl.isNotEmpty()) {
-            saveDirectVideo()
-            return
-        }
         if (bvid.isEmpty() || cid == 0L) {
             Toast.makeText(this, "无效的视频参数", Toast.LENGTH_SHORT).show()
             return
@@ -214,26 +199,6 @@ class PlayerActivity : AppCompatActivity() {
                 }
             }
             isSaving = false
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    private fun saveDirectVideo() {
-        try {
-            val safeTitle = videoTitle.ifBlank { "shortvideo_${System.currentTimeMillis()}" }
-                .replace(Regex("[\\\\/:*?\"<>|]"), "_").take(60)
-            val request = android.app.DownloadManager.Request(android.net.Uri.parse(directUrl))
-                .setTitle(safeTitle)
-                .setMimeType("video/mp4")
-                .setNotificationVisibility(
-                    android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
-                )
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_MOVIES, "$safeTitle.mp4")
-            val dm = getSystemService(android.content.Context.DOWNLOAD_SERVICE) as android.app.DownloadManager
-            dm.enqueue(request)
-            Toast.makeText(this, "已开始下载：$safeTitle.mp4", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Toast.makeText(this, "下载失败：${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
