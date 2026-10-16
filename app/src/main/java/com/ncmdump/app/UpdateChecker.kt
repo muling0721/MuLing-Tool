@@ -1,14 +1,17 @@
 package com.ncmdump.app
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
-import androidx.appcompat.app.AlertDialog
-import kotlin.concurrent.thread
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.TextView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.concurrent.thread
 
 object UpdateChecker {
 
@@ -23,6 +26,7 @@ object UpdateChecker {
     )
 
     fun checkUpdate(context: Context, showNoUpdate: Boolean = false) {
+        val activity = context as? Activity
         thread {
             try {
                 val release = fetchLatestRelease()
@@ -30,35 +34,33 @@ object UpdateChecker {
                     val latestVersion = release.tagName.removePrefix("v")
                     val currentVersion = getCurrentVersion(context)
                     if (isNewerVersion(latestVersion, currentVersion)) {
-                        (context as? android.app.Activity)?.runOnUiThread {
-                            showUpdateDialog(context, release)
+                        activity?.runOnUiThread {
+                            showUpdateDialog(activity, currentVersion, release)
                         }
                     } else if (showNoUpdate) {
-                        (context as? android.app.Activity)?.runOnUiThread {
-                            AlertDialog.Builder(context)
-                                .setTitle("检查更新")
-                                .setMessage("当前已是最新版本\n当前版本: v$currentVersion")
-                                .setPositiveButton("确定", null)
-                                .show()
+                        activity?.runOnUiThread {
+                            showInfoDialog(
+                                activity,
+                                "已是最新版本",
+                                "v$currentVersion",
+                                "当前已是最新版本，无需更新。"
+                            )
                         }
                     }
                 } else if (showNoUpdate) {
-                    (context as? android.app.Activity)?.runOnUiThread {
-                        AlertDialog.Builder(context)
-                            .setTitle("检查更新")
-                            .setMessage("无法获取更新信息，请检查网络")
-                            .setPositiveButton("确定", null)
-                            .show()
+                    activity?.runOnUiThread {
+                        showInfoDialog(
+                            activity,
+                            "检查更新失败",
+                            null,
+                            "无法获取更新信息，请检查网络连接后重试。"
+                        )
                     }
                 }
             } catch (e: Exception) {
                 if (showNoUpdate) {
-                    (context as? android.app.Activity)?.runOnUiThread {
-                        AlertDialog.Builder(context)
-                            .setTitle("检查更新")
-                            .setMessage("检查更新失败: ${e.message}")
-                            .setPositiveButton("确定", null)
-                            .show()
+                    activity?.runOnUiThread {
+                        showInfoDialog(activity, "检查更新失败", null, e.message ?: "未知错误")
                     }
                 }
             }
@@ -90,16 +92,40 @@ object UpdateChecker {
         }
     }
 
-    private fun showUpdateDialog(context: Context, release: ReleaseInfo) {
-        AlertDialog.Builder(context)
-            .setTitle("最新版本已发布是否更新")
-            .setMessage("当前版本: ${getCurrentVersion(context)}\n最新版本: ${release.tagName}")
+    private fun showUpdateDialog(activity: Activity, currentVersion: String, release: ReleaseInfo) {
+        val view = LayoutInflater.from(activity).inflate(R.layout.dialog_update, null)
+        view.findViewById<TextView>(R.id.tvDialogTitle).text = "发现新版本"
+        view.findViewById<TextView>(R.id.tvDialogSubtitle).text =
+            "v$currentVersion  →  ${release.tagName}"
+        view.findViewById<TextView>(R.id.tvDialogBody).text =
+            release.body.ifBlank { "有新版本可用，建议更新以获得最新修复与改进。" }
+
+        MaterialAlertDialogBuilder(activity)
+            .setView(view)
             .setPositiveButton("立即更新") { _, _ ->
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(release.htmlUrl))
-                context.startActivity(intent)
+                runCatching {
+                    activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(release.htmlUrl)))
+                }
             }
-            .setNegativeButton("暂不更新", null)
-            .setCancelable(false)
+            .setNegativeButton("稍后", null)
+            .show()
+    }
+
+    private fun showInfoDialog(activity: Activity, title: String, subtitle: String?, message: String) {
+        val view = LayoutInflater.from(activity).inflate(R.layout.dialog_update, null)
+        view.findViewById<TextView>(R.id.tvDialogTitle).text = title
+        view.findViewById<TextView>(R.id.tvDialogSubtitle).apply {
+            if (subtitle.isNullOrBlank()) {
+                visibility = View.GONE
+            } else {
+                text = subtitle
+            }
+        }
+        view.findViewById<TextView>(R.id.tvDialogBody).text = message
+
+        MaterialAlertDialogBuilder(activity)
+            .setView(view)
+            .setPositiveButton("好的", null)
             .show()
     }
 
