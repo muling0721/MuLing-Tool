@@ -9,6 +9,10 @@
         android:icon="@drawable/ic_video"
         android:title="视频处理" />
     <item
+        android:id="@+id/nav_short"
+        android:icon="@drawable/ic_short_video"
+        android:title="短视频" />
+    <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/ic_settings"
         android:title="设置" />
