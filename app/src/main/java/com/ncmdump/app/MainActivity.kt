@@ -172,7 +172,7 @@ class MainActivity : AppCompatActivity() {
      * 实时应用卡片不透明度：遍历所有 CardView 修改背景。
      * 有自定义背景时默认更透明（72%），避免卡片完全挡住背景图。
      */
-    private fun applyCardOpacity() {
+    fun applyCardOpacity() {
         val hasBg = getCustomBackgroundUri() != null
         val opacity = prefs.getInt("card_opacity", if (hasBg) 72 else 100)
         val alpha = (opacity * 255 / 100).coerceIn(0, 255)

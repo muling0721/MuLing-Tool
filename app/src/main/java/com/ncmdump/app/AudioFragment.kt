@@ -51,7 +51,10 @@ class AudioFragment : Fragment() {
             .replace(R.id.audioContent, fragment)
             .addToBackStack(null)
             .commit()
-        view?.post { applyBgToChild() }
+        view?.post {
+            applyBgToChild()
+            (activity as? MainActivity)?.applyCardOpacity()
+        }
     }
 
     fun goBack(): Boolean {
@@ -98,6 +101,9 @@ class AudioFragment : Fragment() {
             }
             view.findViewById<LinearLayout>(R.id.menuConvert).setOnClickListener {
                 (parentFragment as AudioFragment).openChild(AudioConvertFragment())
+            }
+            view.findViewById<LinearLayout>(R.id.menuNetease).setOnClickListener {
+                (parentFragment as AudioFragment).openChild(NeteaseFragment())
             }
         }
     }

@@ -116,6 +116,51 @@
                         android:tint="?attr/colorOnSurfaceVariant"
                         android:contentDescription="@null" />
                 </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="72dp"
+                    android:background="?attr/colorOutlineVariant" />
+
+                <!-- 网易云歌曲解析 -->
+                <LinearLayout
+                    android:id="@+id/menuNetease"
+                    style="@style/Widget.MuLing.ListRow">
+
+                    <ImageView
+                        style="@style/Widget.MuLing.IconBadge"
+                        android:src="@drawable/ic_search"
+                        android:contentDescription="@null" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="网易云歌曲解析"
+                            android:textAppearance="@style/TextAppearance.MuLing.RowTitle" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="在线搜索 / 试听 / 复制直链 / 下载"
+                            android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_forward"
+                        android:tint="?attr/colorOnSurfaceVariant"
+                        android:contentDescription="@null" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
