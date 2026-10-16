@@ -41,13 +41,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="BV 号 / AV 号 / 视频链接"
+                    app:placeholderText="BV1xx411c7mD"
                     android:layout_marginBottom="14dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etBvid"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="BV1xx411c7mD"
                         android:inputType="text"
                         android:maxLines="1"
                         android:textSize="15sp" />

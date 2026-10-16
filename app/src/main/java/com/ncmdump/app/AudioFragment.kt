@@ -43,10 +43,10 @@ class AudioFragment : Fragment() {
         currentChild = fragment
         childFragmentManager.beginTransaction()
             .setCustomAnimations(
-                androidx.appcompat.R.anim.abc_slide_in_bottom,
-                androidx.appcompat.R.anim.abc_fade_out,
-                androidx.appcompat.R.anim.abc_fade_in,
-                androidx.appcompat.R.anim.abc_slide_out_bottom
+                R.anim.nav_enter,
+                R.anim.nav_exit,
+                R.anim.nav_pop_enter,
+                R.anim.nav_pop_exit
             )
             .replace(R.id.audioContent, fragment)
             .addToBackStack(null)

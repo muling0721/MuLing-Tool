@@ -116,7 +116,8 @@ class ThemeActivity : AppCompatActivity() {
             else -> highlightThemeButton(btnThemeSystem)
         }
 
-        val opacity = prefs.getInt("card_opacity", 88)
+        val hasBg = prefs.getString("custom_background", "").isNullOrEmpty().not()
+        val opacity = prefs.getInt("card_opacity", if (hasBg) 72 else 100)
         seekCardOpacity.progress = opacity
         tvCardOpacity.text = "$opacity%"
 
@@ -152,7 +153,6 @@ class ThemeActivity : AppCompatActivity() {
 
     private fun applyCustomBackground() {
         val bgUriStr = prefs.getString("custom_background", "")
-        val maskAlpha = 0
         val rootView = findViewById<View>(android.R.id.content)
 
         if (!bgUriStr.isNullOrEmpty()) {
@@ -162,19 +162,26 @@ class ThemeActivity : AppCompatActivity() {
                 val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
                 inputStream?.close()
                 if (bitmap != null) {
-                    rootView.background = android.graphics.drawable.BitmapDrawable(resources, bitmap)
-                    rootView.foreground = android.graphics.drawable.ColorDrawable(
-                        android.graphics.Color.argb(maskAlpha, 255, 255, 255)
+                    val bitmapDrawable = android.graphics.drawable.BitmapDrawable(resources, bitmap)
+                    bitmapDrawable.gravity = android.view.Gravity.FILL
+                    val surface = com.google.android.material.color.MaterialColors.getColor(
+                        rootView, com.google.android.material.R.attr.colorSurface
                     )
+                    val scrim = android.graphics.drawable.ColorDrawable(
+                        androidx.core.graphics.ColorUtils.setAlphaComponent(surface, 0x5A)
+                    )
+                    rootView.background = android.graphics.drawable.LayerDrawable(
+                        arrayOf(bitmapDrawable, scrim)
+                    )
+                    rootView.foreground = null
+                    return
                 }
             } catch (_: Exception) {
-                rootView.setBackgroundResource(R.color.bg_main)
-                rootView.foreground = null
+                // 回退到默认背景
             }
-        } else {
-            rootView.setBackgroundResource(R.color.bg_main)
-            rootView.foreground = null
         }
+        rootView.setBackgroundResource(R.color.bg_main)
+        rootView.foreground = null
     }
 
     override fun onSupportNavigateUp(): Boolean {

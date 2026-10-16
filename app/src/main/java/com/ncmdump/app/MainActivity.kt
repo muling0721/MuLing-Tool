@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -20,6 +21,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var topAppBar: MaterialToolbar
+    private lateinit var appBar: AppBarLayout
     private lateinit var rootView: View
 
     private val tabTitles = arrayOf("音频处理", "视频处理", "设置")
@@ -79,8 +81,9 @@ class MainActivity : AppCompatActivity() {
         rootView = findViewById(android.R.id.content)
         bottomNav = findViewById(R.id.bottomNav)
         topAppBar = findViewById(R.id.topAppBar)
+        appBar = findViewById(R.id.appBar)
 
-        applyGlassEffect(bottomNav)
+        applyChrome()
         applyCardOpacity()
 
         // 返回键处理：先退出音频二级页面
@@ -123,10 +126,10 @@ class MainActivity : AppCompatActivity() {
             recreate()
             return
         }
-        // 实时应用卡片不透明度、背景暗度、模糊
+        // 实时应用卡片不透明度、背景遮罩、悬浮栏透明度
         applyCardOpacity()
         applyCustomBackground()
-        applyGlassEffect(bottomNav)
+        applyChrome()
     }
 
     private fun applyThemeMode(mode: String) {
@@ -137,20 +140,41 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun applyGlassEffect(view: View) {
-        view.elevation = 8f
-        // 使用 Material 3 表面色作为导航栏背景，呈现 KernelSU 同款效果
-        val color = com.google.android.material.color.MaterialColors.getColor(
-            view, com.google.android.material.R.attr.colorSurfaceContainer
+    /**
+     * 顶栏 / 底部导航栏：有自定义背景时半透明，让背景图透出来；无背景时使用纯主题色。
+     */
+    private fun applyChrome() {
+        val hasBg = getCustomBackgroundUri() != null
+        val surface = com.google.android.material.color.MaterialColors.getColor(
+            rootView, com.google.android.material.R.attr.colorSurface
         )
-        view.setBackgroundColor(color)
+        val container = com.google.android.material.color.MaterialColors.getColor(
+            rootView, com.google.android.material.R.attr.colorSurfaceContainer
+        )
+
+        if (hasBg) {
+            val barColor = androidx.core.graphics.ColorUtils.setAlphaComponent(surface, 0xE6)
+            appBar.setBackgroundColor(barColor)
+            topAppBar.setBackgroundColor(barColor)
+            bottomNav.setBackgroundColor(
+                androidx.core.graphics.ColorUtils.setAlphaComponent(container, 0xE6)
+            )
+            bottomNav.elevation = 8f
+        } else {
+            appBar.setBackgroundColor(surface)
+            topAppBar.setBackgroundColor(surface)
+            bottomNav.setBackgroundColor(container)
+            bottomNav.elevation = 3f
+        }
     }
 
     /**
-     * 实时应用卡片不透明度：遍历所有 CardView 修改背景
+     * 实时应用卡片不透明度：遍历所有 CardView 修改背景。
+     * 有自定义背景时默认更透明（72%），避免卡片完全挡住背景图。
      */
     private fun applyCardOpacity() {
-        val opacity = prefs.getInt("card_opacity", 100)
+        val hasBg = getCustomBackgroundUri() != null
+        val opacity = prefs.getInt("card_opacity", if (hasBg) 72 else 100)
         val alpha = (opacity * 255 / 100).coerceIn(0, 255)
         // 基于主题表面色应用不透明度，保持 Material 3 观感
         val base = com.google.android.material.color.MaterialColors.getColor(
@@ -190,28 +214,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun applyBackgroundToView(view: View, bgUri: Uri?) {
-        val maskAlpha = 0
-
         if (bgUri != null) {
             try {
                 val inputStream = contentResolver.openInputStream(bgUri)
                 val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
                 inputStream?.close()
                 if (bitmap != null) {
-                    val drawable = android.graphics.drawable.BitmapDrawable(resources, bitmap)
-                    view.background = drawable
-                    view.foreground = android.graphics.drawable.ColorDrawable(
-                        Color.argb(maskAlpha, 255, 255, 255)
+                    val bitmapDrawable = android.graphics.drawable.BitmapDrawable(resources, bitmap)
+                    bitmapDrawable.gravity = android.view.Gravity.FILL
+                    // 主题色半透明遮罩：让任意明暗的背景图都能与 M3 配色融合，并保证前景内容可读
+                    val surface = com.google.android.material.color.MaterialColors.getColor(
+                        view, com.google.android.material.R.attr.colorSurface
                     )
+                    val scrim = android.graphics.drawable.ColorDrawable(
+                        androidx.core.graphics.ColorUtils.setAlphaComponent(surface, 0x5A)
+                    )
+                    // 先铺图片，再叠遮罩，最后才是内容（background 永远在子 View 之下）
+                    view.background = android.graphics.drawable.LayerDrawable(
+                        arrayOf(bitmapDrawable, scrim)
+                    )
+                    view.foreground = null
+                    return
                 }
             } catch (_: Exception) {
-                view.setBackgroundResource(R.color.bg_main)
-                view.foreground = null
+                // 回退到默认背景
             }
-        } else {
-            view.setBackgroundResource(R.color.bg_main)
-            view.foreground = null
         }
+        view.setBackgroundResource(R.color.bg_main)
+        view.foreground = null
     }
 
     fun getCustomBackgroundUri(): Uri? {
