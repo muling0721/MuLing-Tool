@@ -117,13 +117,13 @@ class ThemeActivity : AppCompatActivity() {
         }
 
         val hasBg = prefs.getString("custom_background", "").isNullOrEmpty().not()
+
         val opacity = prefs.getInt("card_opacity", if (hasBg) 72 else 100)
         seekCardOpacity.progress = opacity
         tvCardOpacity.text = "$opacity%"
 
         switchBlur.isChecked = prefs.getBoolean("enable_blur", false)
 
-        val hasBg = prefs.getString("custom_background", "").isNullOrEmpty().not()
         switchCustomBg.isChecked = hasBg
     }
 
