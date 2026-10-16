@@ -19,6 +19,12 @@ jobs:
             printf '===== %s\n[http %s] %s\n%s\n\n' "$name" "$code" "$url" "$(printf '%s' "$body" | sed '$d' | head -c 400)"
           }
           echo "### DOUYIN"
+          probe "tikwm"          "https://www.tikwm.com/api/?url=$DY"
+          probe "tikwm2"         "https://tikwm.com/api/?url=$DY"
+          probe "douyin-wtf-hybrid" "https://api.douyin.wtf/api/hybrid/video_data?url=$DY&minimal=false"
+          probe "douyin-wtf-api" "https://api.douyin.wtf/api?url=$DY"
+          probe "tiklydown"      "https://api.tiklydown.eu.org/api/download?url=$DY"
+          probe "douyin-wtf-root" "https://douyin.wtf/api/hybrid/video_data?url=$DY"
           probe "xingzhige"      "https://api.xingzhige.com/API/douyin/?url=$DY"
           probe "xingzhige-wm"   "https://api.xingzhige.com/API/douyinWM/?url=$DY"
           probe "pearktrue"      "https://api.pearktrue.cn/api/douyin/?url=$DY"
