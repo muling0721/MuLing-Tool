@@ -9,11 +9,12 @@ jobs:
     steps:
       - name: Probe douyin/kuaishou parse APIs
         run: |
+          set +e
           DY="https://v.douyin.com/iRNBho6u/"
           probe () {
             local name="$1"; local url="$2"
             local code body
-            body="$(curl -s -m 20 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126.0 Safari/537.36" -w $'\n%{http_code}' "$url" 2>/dev/null)"
+            body="$(curl -s -m 20 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126.0 Safari/537.36" -w $'\n%{http_code}' "$url" 2>/dev/null || true)"
             code="$(printf '%s' "$body" | tail -n1)"
             printf '===== %s\n[http %s] %s\n%s\n\n' "$name" "$code" "$url" "$(printf '%s' "$body" | sed '$d' | head -c 400)"
           }
