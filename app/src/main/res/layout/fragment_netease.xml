@@ -1,92 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/transparent"
-    android:paddingHorizontal="16dp"
-    android:paddingTop="16dp"
-    android:paddingBottom="16dp">
+    android:background="@android:color/transparent">
 
-    <TextView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="网易云歌曲解析"
-        android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
-        android:layout_marginStart="4dp"
-        android:layout_marginBottom="8dp" />
-
-    <com.google.android.material.card.MaterialCardView
-        style="@style/Widget.MuLing.Card"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp">
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="96dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MuLing.TextInput"
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="搜索歌曲 / 歌手"
-                app:placeholderText="例如：晴天"
-                android:layout_marginBottom="14dp">
+                android:text="网易云歌曲解析"
+                android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="8dp" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etKeyword"
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.MuLing.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:imeOptions="actionSearch"
-                    android:textSize="15sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSearch"
-                style="@style/Widget.MuLing.Button"
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MuLing.TextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="搜索歌曲 / 歌手"
+                        app:placeholderText="例如：晴天"
+                        android:layout_marginBottom="14dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etKeyword"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:maxLines="1"
+                            android:imeOptions="actionSearch"
+                            android:textSize="15sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSearch"
+                        style="@style/Widget.MuLing.Button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="搜索"
+                        app:icon="@drawable/ic_search"
+                        app:iconGravity="textStart" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/tvNeteaseStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="搜索"
-                app:icon="@drawable/ic_search"
-                app:iconGravity="textStart" />
+                android:text="输入关键词开始搜索，点击结果试听，长按查看更多"
+                android:textAppearance="@style/TextAppearance.MuLing.Body"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.MuLing.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvSongs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:scrollbars="none" />
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.core.widget.NestedScrollView>
 
-    <TextView
-        android:id="@+id/tvNeteaseStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="输入关键词开始搜索，点击结果试听，长按复制直链"
-        android:textAppearance="@style/TextAppearance.MuLing.Body"
-        android:layout_marginBottom="12dp" />
-
-    <com.google.android.material.card.MaterialCardView
-        style="@style/Widget.MuLing.Card"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvSongs"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:scrollbars="vertical" />
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- 迷你播放器 -->
+    <!-- 迷你播放器（悬浮在底部） -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardPlayer"
         style="@style/Widget.MuLing.Card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_gravity="bottom"
+        android:layout_margin="12dp"
+        android:elevation="6dp"
+        app:cardElevation="6dp"
         android:visibility="gone">
 
         <LinearLayout
@@ -135,39 +148,39 @@
 
             <ImageButton
                 android:id="@+id/btnPlayPause"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_play"
                 android:tint="?attr/colorOnSurface"
                 android:contentDescription="播放/暂停" />
 
             <ImageButton
-                android:id="@+id/btnCopyUrl"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:id="@+id/btnLyric"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_copy"
+                android:src="@drawable/ic_lyrics"
                 android:tint="?attr/colorOnSurfaceVariant"
-                android:contentDescription="复制直链" />
+                android:contentDescription="下载歌词" />
 
             <ImageButton
                 android:id="@+id/btnDownload"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_download"
                 android:tint="?attr/colorOnSurfaceVariant"
-                android:contentDescription="下载" />
+                android:contentDescription="下载音频" />
 
             <ImageButton
                 android:id="@+id/btnClose"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_close"
                 android:tint="?attr/colorOnSurfaceVariant"
                 android:contentDescription="关闭" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-</LinearLayout>
+</FrameLayout>

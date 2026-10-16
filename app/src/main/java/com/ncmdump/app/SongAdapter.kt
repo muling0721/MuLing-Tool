@@ -11,7 +11,7 @@ import java.net.URL
 
 class SongAdapter(
     private val onPlay: (NeteaseApi.Song) -> Unit,
-    private val onCopy: (NeteaseApi.Song) -> Unit
+    private val onMore: (NeteaseApi.Song) -> Unit
 ) : RecyclerView.Adapter<SongAdapter.VH>() {
 
     private val items = mutableListOf<NeteaseApi.Song>()
@@ -38,7 +38,7 @@ class SongAdapter(
         holder.duration.text = if (song.durationMs > 0) NeteaseApi.formatDuration(song.durationMs) else ""
         loadCover(holder.cover, song.cover)
         holder.itemView.setOnClickListener { onPlay(song) }
-        holder.itemView.setOnLongClickListener { onCopy(song); true }
+        holder.itemView.setOnLongClickListener { onMore(song); true }
     }
 
     private fun loadCover(iv: ImageView, url: String) {

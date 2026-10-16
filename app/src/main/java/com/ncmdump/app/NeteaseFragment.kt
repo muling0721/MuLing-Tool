@@ -1,13 +1,15 @@
 package com.ncmdump.app
 
+import android.Manifest
 import android.app.DownloadManager
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.media.AudioAttributes
-import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.view.LayoutInflater
@@ -20,14 +22,25 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
+import java.io.File
 import java.net.URL
 import kotlin.concurrent.thread
 
 /**
- * 网易云歌曲解析：在线搜索 → 试听 / 复制直链 / 下载
+ * 网易云歌曲解析：在线搜索 → 试听（系统媒体通知可控）/ 下载歌词 / 复制直链 / 下载音频
  * 接口参考 reference/netease-music/
  */
 class NeteaseFragment : Fragment() {
@@ -41,16 +54,31 @@ class NeteaseFragment : Fragment() {
     private lateinit var tvPlayerTitle: TextView
     private lateinit var tvPlayerArtist: TextView
     private lateinit var btnPlayPause: ImageButton
-    private lateinit var btnCopyUrl: ImageButton
+    private lateinit var btnLyric: ImageButton
     private lateinit var btnDownload: ImageButton
     private lateinit var btnClose: ImageButton
 
     private lateinit var adapter: SongAdapter
-    private var player: MediaPlayer? = null
+    private var controllerFuture: ListenableFuture<MediaController>? = null
+    private var controller: MediaController? = null
     private var currentSong: NeteaseApi.Song? = null
-    private var isPlaying = false
-    private var isPreparing = false
+    private var pendingSong: NeteaseApi.Song? = null
     private var searchToken = 0
+
+    private val notifPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
+    private val controllerListener = object : Player.Listener {
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            updatePlayIcon()
+            val song = currentSong ?: return
+            tvStatus.text = if (isPlaying) "正在播放：${song.name}" else "已暂停：${song.name}"
+        }
+
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            updatePlayIcon()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -70,11 +98,11 @@ class NeteaseFragment : Fragment() {
         tvPlayerTitle = view.findViewById(R.id.tvPlayerTitle)
         tvPlayerArtist = view.findViewById(R.id.tvPlayerArtist)
         btnPlayPause = view.findViewById(R.id.btnPlayPause)
-        btnCopyUrl = view.findViewById(R.id.btnCopyUrl)
+        btnLyric = view.findViewById(R.id.btnLyric)
         btnDownload = view.findViewById(R.id.btnDownload)
         btnClose = view.findViewById(R.id.btnClose)
 
-        adapter = SongAdapter(onPlay = { play(it) }, onCopy = { copyDirect(it) })
+        adapter = SongAdapter(onPlay = { play(it) }, onMore = { showSongMenu(it) })
         rvSongs.layoutManager = LinearLayoutManager(requireContext())
         rvSongs.adapter = adapter
 
@@ -87,10 +115,49 @@ class NeteaseFragment : Fragment() {
         }
 
         btnPlayPause.setOnClickListener { togglePlay() }
-        btnCopyUrl.setOnClickListener { currentSong?.let { copyDirect(it) } }
+        btnLyric.setOnClickListener { currentSong?.let { downloadLyric(it) } }
         btnDownload.setOnClickListener { currentSong?.let { download(it) } }
         btnClose.setOnClickListener { closePlayer() }
     }
+
+    override fun onStart() {
+        super.onStart()
+        val token = SessionToken(
+            requireContext(),
+            ComponentName(requireContext(), PlaybackService::class.java)
+        )
+        val future = MediaController.Builder(requireContext(), token).buildAsync()
+        controllerFuture = future
+        future.addListener({
+            val c = try {
+                future.get()
+            } catch (_: Exception) {
+                null
+            }
+            if (c == null) {
+                toast("播放器初始化失败")
+                return@addListener
+            }
+            controller = c
+            c.addListener(controllerListener)
+            restorePlayerUi(c)
+            updatePlayIcon()
+            pendingSong?.let { song ->
+                pendingSong = null
+                play(song)
+            }
+        }, MoreExecutors.directExecutor())
+    }
+
+    override fun onStop() {
+        controller?.removeListener(controllerListener)
+        controller = null
+        controllerFuture?.let { MediaController.releaseFuture(it) }
+        controllerFuture = null
+        super.onStop()
+    }
+
+    // ---------------- 搜索 ----------------
 
     private fun doSearch() {
         val keyword = etKeyword.text.toString().trim()
@@ -113,103 +180,137 @@ class NeteaseFragment : Fragment() {
                     }
                 } else {
                     adapter.submit(list)
-                    tvStatus.text = "共 ${list.size} 首 · 点击试听，长按复制直链"
+                    tvStatus.text = "共 ${list.size} 首 · 点击试听，长按查看更多"
                 }
             }
         }
     }
 
+    // ---------------- 播放 ----------------
+
     private fun play(song: NeteaseApi.Song) {
+        val c = controller
+        if (c == null) {
+            pendingSong = song
+            toast("正在初始化播放器…")
+            return
+        }
+        ensureNotificationPermission()
+
         currentSong = song
         cardPlayer.visibility = View.VISIBLE
         tvPlayerTitle.text = song.name
         tvPlayerArtist.text = song.artist
         loadPlayerCover(song.cover)
-        startStream(song)
-    }
 
-    private fun startStream(song: NeteaseApi.Song) {
-        stopPlayer()
-        isPreparing = true
-        isPlaying = false
-        updatePlayIcon()
+        val metadata = MediaMetadata.Builder()
+            .setTitle(song.name)
+            .setArtist(song.artist)
+            .apply { if (song.cover.isNotEmpty()) setArtworkUri(Uri.parse(song.cover)) }
+            .build()
+        val item = MediaItem.Builder()
+            .setMediaId(song.id)
+            .setUri(NeteaseApi.streamUrl(song.id))
+            .setMediaMetadata(metadata)
+            .build()
+
+        c.setMediaItem(item)
+        c.prepare()
+        c.play()
         tvStatus.text = "正在加载：${song.name}"
-
-        val mp = MediaPlayer()
-        mp.setAudioAttributes(
-            AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .build()
-        )
-        try {
-            mp.setDataSource(NeteaseApi.streamUrl(song.id))
-        } catch (e: Exception) {
-            mp.release()
-            toast("播放失败：${e.message}")
-            return
-        }
-        mp.setOnPreparedListener {
-            isPreparing = false
-            isPlaying = true
-            it.start()
-            updatePlayIcon()
-            tvStatus.text = "正在播放：${song.name}"
-        }
-        mp.setOnCompletionListener { stopPlayer() }
-        mp.setOnErrorListener { _, _, _ ->
-            isPreparing = false
-            isPlaying = false
-            updatePlayIcon()
-            toast("播放失败，可能该歌曲无版权或链接失效")
-            true
-        }
-        mp.prepareAsync()
-        player = mp
     }
 
     private fun togglePlay() {
-        val mp = player
-        if (mp == null) {
-            currentSong?.let { startStream(it) }
-            return
-        }
-        if (isPreparing) return
-        try {
-            if (mp.isPlaying) {
-                mp.pause()
-                isPlaying = false
-            } else {
-                mp.start()
-                isPlaying = true
-            }
-        } catch (_: Exception) {
-        }
-        updatePlayIcon()
-    }
-
-    private fun stopPlayer() {
-        isPreparing = false
-        isPlaying = false
-        val mp = player
-        player = null
-        if (mp != null) {
-            try { mp.stop() } catch (_: Exception) {}
-            try { mp.reset() } catch (_: Exception) {}
-            mp.release()
-        }
+        val c = controller ?: return
+        if (c.isPlaying) c.pause() else c.play()
         updatePlayIcon()
     }
 
     private fun closePlayer() {
-        stopPlayer()
+        controller?.apply {
+            stop()
+            clearMediaItems()
+        }
         currentSong = null
         cardPlayer.visibility = View.GONE
     }
 
     private fun updatePlayIcon() {
-        btnPlayPause.setImageResource(if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
+        val playing = controller?.isPlaying == true
+        btnPlayPause.setImageResource(if (playing) R.drawable.ic_pause else R.drawable.ic_play)
     }
+
+    /** 回到页面时，若后台仍在播放，恢复迷你播放器 */
+    private fun restorePlayerUi(c: MediaController) {
+        val item = c.currentMediaItem ?: return
+        val md = item.mediaMetadata
+        val song = NeteaseApi.Song(
+            id = item.mediaId,
+            name = md.title?.toString().orEmpty(),
+            artist = md.artist?.toString().orEmpty(),
+            album = "",
+            cover = md.artworkUri?.toString().orEmpty(),
+            durationMs = 0L
+        )
+        currentSong = song
+        cardPlayer.visibility = View.VISIBLE
+        tvPlayerTitle.text = song.name
+        tvPlayerArtist.text = song.artist
+        loadPlayerCover(song.cover)
+        tvStatus.text = if (c.isPlaying) "正在播放：${song.name}" else "已暂停：${song.name}"
+    }
+
+    // ---------------- 长按菜单 ----------------
+
+    private fun showSongMenu(song: NeteaseApi.Song) {
+        val options = arrayOf("播放", "下载歌词", "复制音频直链", "下载音频")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(if (song.artist.isBlank()) song.name else "${song.name} - ${song.artist}")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> play(song)
+                    1 -> downloadLyric(song)
+                    2 -> copyDirect(song)
+                    3 -> download(song)
+                }
+            }
+            .show()
+    }
+
+    // ---------------- 歌词 ----------------
+
+    private fun downloadLyric(song: NeteaseApi.Song) {
+        toast("正在获取歌词…")
+        thread {
+            val lyric = NeteaseApi.fetchLyric(song.id)
+            activity?.runOnUiThread {
+                if (lyric == null || lyric.isEmpty) {
+                    toast("未找到该歌曲的歌词")
+                    return@runOnUiThread
+                }
+                val content = lyric.merged()
+                val path = NeteaseApi.saveLyric(requireContext(), song, content)
+                if (path != null) {
+                    toast("歌词已保存：${File(path).name}")
+                } else {
+                    toast("歌词保存失败")
+                }
+                showLyricDialog(song, content)
+            }
+        }
+    }
+
+    private fun showLyricDialog(song: NeteaseApi.Song, content: String) {
+        val view = layoutInflater.inflate(R.layout.dialog_lyric, null)
+        view.findViewById<TextView>(R.id.tvLyricContent).text = content
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(song.name)
+            .setView(view)
+            .setPositiveButton("关闭", null)
+            .show()
+    }
+
+    // ---------------- 复制直链 / 下载 ----------------
 
     private fun copyDirect(song: NeteaseApi.Song) {
         toast("正在解析直链…")
@@ -226,26 +327,40 @@ class NeteaseFragment : Fragment() {
 
     @Suppress("DEPRECATION")
     private fun download(song: NeteaseApi.Song) {
+        val ctx = context ?: return
         try {
-            val fileName = buildFileName(song)
+            val fileName = NeteaseApi.fileNameFor(song, ".mp3")
             val request = DownloadManager.Request(Uri.parse(NeteaseApi.streamUrl(song.id)))
                 .setTitle(song.name)
                 .setDescription(song.artist)
                 .setMimeType("audio/mpeg")
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 .setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC, fileName)
-            val dm = requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            val dm = ctx.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             dm.enqueue(request)
             toast("已加入下载：$fileName")
         } catch (e: Exception) {
             toast("下载失败：${e.message}")
+            return
+        }
+        // 顺便把歌词也存下来
+        thread {
+            val lyric = NeteaseApi.fetchLyric(song.id) ?: return@thread
+            if (!lyric.isEmpty) {
+                NeteaseApi.saveLyric(ctx, song, lyric.merged())
+            }
         }
     }
 
-    private fun buildFileName(song: NeteaseApi.Song): String {
-        val base = listOf(song.name, song.artist).filter { it.isNotBlank() }.joinToString(" - ")
-        val safe = base.replace(Regex("[\\\\/:*?\"<>|]"), "_").take(80).ifBlank { "netease_${song.id}" }
-        return "$safe.mp3"
+    // ---------------- 杂项 ----------------
+
+    private fun ensureNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted = ContextCompat.checkSelfPermission(
+                requireContext(), Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!granted) notifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     private fun loadPlayerCover(url: String) {
@@ -268,10 +383,5 @@ class NeteaseFragment : Fragment() {
 
     private fun toast(msg: String) {
         activity?.let { Toast.makeText(it, msg, Toast.LENGTH_SHORT).show() }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        stopPlayer()
     }
 }
