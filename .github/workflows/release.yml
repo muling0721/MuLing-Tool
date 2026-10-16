@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -75,9 +77,44 @@ jobs:
           set -e
           TAG="${GITHUB_REF_NAME}"
           APK="$(ls app/build/outputs/apk/release/*.apk | head -1)"
-          echo "Publishing $TAG -> $APK"
+
+          # 1) 优先从 CHANGELOG.md 截取该版本的条目作为发布说明
+          BODY="$(awk -v tag="$TAG" '
+            $0 ~ ("^##[[:space:]]*\\[" tag "\\]") {flag=1; next}
+            flag && ($0 ~ "^##[[:space:]]*\\[") {exit}
+            flag {print}
+          ' CHANGELOG.md 2>/dev/null | sed '/./,$!d' || true)"
+
+          # 上一个版本标签
+          PREV="$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || true)"
+
+          # 2) CHANGELOG 没有该版本时，回退为「上一标签 → 当前标签」的提交记录
+          if [ -z "$(printf '%s' "$BODY" | tr -d '[:space:]')" ]; then
+            if [ -n "$PREV" ]; then
+              BODY="$(git log --no-merges --pretty='- %s' "$PREV..$TAG")"
+            else
+              BODY="$(git log --no-merges --pretty='- %s' "$TAG")"
+            fi
+          fi
+
+          {
+            echo "## ${TAG} 更新内容"
+            echo
+            echo "$BODY"
+            echo
+            if [ -n "$PREV" ]; then
+              echo "**完整对比**：https://github.com/${GITHUB_REPOSITORY}/compare/${PREV}...${TAG}"
+            fi
+            echo "**APK**：\`MuLing-Tool-${TAG}.apk\`"
+          } > release_notes.md
+
+          echo "----- release notes -----"
+          cat release_notes.md
+          echo "-------------------------"
+
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "$APK" --clobber
+            gh release edit "$TAG" --notes-file release_notes.md
           else
-            gh release create "$TAG" "$APK" --title "$TAG" --generate-notes
+            gh release create "$TAG" "$APK" --title "$TAG" --notes-file release_notes.md
           fi

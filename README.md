@@ -1,8 +1,14 @@
-# 解析tool - Analysis Tool
+# MuLing Tool
 
-NCM 解密 + 哔哩哔哩视频解析的 Android 多媒体工具箱。
+> Android 多媒体工具箱 · NCM 解密 · 音频处理 · 哔哩哔哩解析
 
-基于 ncmdump C++ 核心的 Android 图形化解密工具，附带哔哩哔哩视频解析功能。
+![Android CI](https://github.com/muling0721/MuLing-Tool/actions/workflows/build.yml/badge.svg)
+![Release](https://img.shields.io/github/v/release/muling0721/MuLing-Tool?label=release&color=blue)
+![Platform](https://img.shields.io/badge/platform-Android%206.0%2B-3ddc84?logo=android&logoColor=white)
+![UI](https://img.shields.io/badge/UI-Material%203-6750a4)
+
+基于 ncmdump C++ 核心的 Android 图形化解密工具，附带哔哩哔哩视频解析与音频处理功能。
+界面采用 Material 3 / Material You 设计，Android 12+ 可跟随系统动态取色。
 
 ## 功能
 
@@ -20,6 +26,13 @@ NCM 解密 + 哔哩哔哩视频解析的 Android 多媒体工具箱。
 - 显示封面、标题、UP主、时长、简介、分P列表
 - 获取 DASH 播放地址（视频流 + 音频流），支持复制
 - wbi 签名自动处理
+
+### 界面与主题
+- Material 3 / Material You 界面，Android 12+ 动态取色
+- 深色 / 浅色 / 跟随系统三种模式
+- 自定义背景图片：叠加主题色半透明遮罩，卡片与悬浮栏透明化，任意明暗背景图都能保持可读
+- 卡片不透明度可调
+- 更新检测使用 Material 3 对话框，展示版本对比与更新说明
 
 ## 项目结构
 
@@ -74,10 +87,17 @@ ncm 文件采用两层加密：
 ```bash
 export JAVA_HOME=/path/to/jdk17
 export ANDROID_HOME=/path/to/android-sdk
-gradle assembleRelease
+
+gradle assembleDebug      # 调试包，无需签名
+gradle assembleRelease    # 发布包，需要仓库根目录的 release.jks
 ```
 
-APK 输出路径：`app/build/outputs/apk/release/`
+APK 输出路径：`app/build/outputs/apk/debug/`、`app/build/outputs/apk/release/`
+
+### GitHub Actions
+- **Android CI**（`.github/workflows/build.yml`）：push 到 `master` 时构建 Debug APK 并上传 Artifact
+- **Release**（`.github/workflows/release.yml`）：推送 `v*` 标签时构建**签名** Release 并发布 GitHub Release
+  - 签名信息通过仓库 Secrets 注入：`SIGNING_KEYSTORE_BASE64` / `SIGNING_STORE_PASSWORD` / `SIGNING_KEY_ALIAS` / `SIGNING_KEY_PASSWORD`
 
 ## 使用
 
@@ -112,6 +132,10 @@ Android 10+ 采用 Scoped Storage，通过 SAF 选择的文件只有 `content://
 - 支持 MP3 ID3v2 和 FLAC 格式
 - 封面写入：`deleteArtworkField()` + `addField(artwork)` 避免冲突
 - 每项操作独立 try-catch，单项失败不影响整体
+
+## 更新日志
+
+每个版本的改动记录在 [CHANGELOG.md](CHANGELOG.md)，详见 [Releases](https://github.com/muling0721/MuLing-Tool/releases)。
 
 ## 版权声明
 
