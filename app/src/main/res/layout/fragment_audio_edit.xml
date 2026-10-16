@@ -4,37 +4,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@android:color/transparent">
+    android:background="@android:color/transparent"
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="音频剪辑"
-            android:textColor="@color/text_primary"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="剪辑音频"
-            android:textColor="@color/text_hint"
-            android:textSize="11sp"
+            android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+            android:layout_marginStart="4dp"
             android:layout_marginBottom="8dp" />
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.MuLing.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
@@ -43,14 +35,12 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSelectTrim"
+                    style="@style/Widget.MuLing.Button"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
+                    android:layout_height="wrap_content"
                     android:text="选择要剪辑的文件"
-                    android:backgroundTint="@color/primary"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14sp"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
@@ -58,8 +48,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="未选择文件"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
+                    android:textAppearance="@style/TextAppearance.MuLing.Body"
                     android:layout_marginBottom="12dp" />
 
                 <LinearLayout
@@ -73,42 +62,37 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="拖拽选择区间"
-                        android:textColor="@color/text_hint"
-                        android:textSize="11sp"
+                        android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
                         android:layout_marginBottom="8dp" />
 
                     <com.ncmdump.app.AudioTrimView
                         android:id="@+id/trimView"
                         android:layout_width="match_parent"
-                        android:layout_height="80dp"
+                        android:layout_height="88dp"
                         android:layout_marginBottom="12dp" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnTrim"
+                        style="@style/Widget.MuLing.Button"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:text="开始剪辑"
-                        android:backgroundTint="@color/primary"
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp" />
+                        android:layout_height="wrap_content"
+                        android:text="开始剪辑" />
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="合并音频"
-            android:textColor="@color/text_hint"
-            android:textSize="11sp"
+            android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+            android:layout_marginStart="4dp"
             android:layout_marginBottom="8dp" />
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.MuLing.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
@@ -117,14 +101,12 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSelectMerge"
+                    style="@style/Widget.MuLing.Button"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
+                    android:layout_height="wrap_content"
                     android:text="选择要合并的文件（可多选）"
-                    android:backgroundTint="@color/primary"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14sp"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
@@ -132,26 +114,24 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="未选择文件"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
+                    android:textAppearance="@style/TextAppearance.MuLing.Body"
                     android:layout_marginBottom="12dp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnMerge"
+                    style="@style/Widget.MuLing.Button"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:text="开始合并"
-                    android:backgroundTint="@color/primary"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14sp" />
+                    android:layout_height="wrap_content"
+                    android:text="开始合并" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progressBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            app:trackCornerRadius="4dp"
             android:layout_marginBottom="16dp" />
 
         <TextView
@@ -159,8 +139,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="等待操作..."
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp"
+            android:textAppearance="@style/TextAppearance.MuLing.Body"
             android:lineSpacingExtra="4dp" />
 
     </LinearLayout>

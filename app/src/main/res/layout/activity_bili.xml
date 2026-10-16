@@ -1,225 +1,226 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5"
-    android:fillViewport="true">
+    android:orientation="vertical"
+    android:background="?attr/colorSurface"
+    android:fitsSystemWindows="true">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:background="?attr/colorSurface"
+        app:elevation="0dp"
+        app:liftOnScroll="true">
 
-        <!-- 标题 -->
-        <TextView
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorSurface"
+            app:title="B站视频解析"
+            app:titleTextColor="?attr/colorOnSurface"
+            app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:clipToPadding="false">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="哔哩哔哩视频解析"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_marginBottom="16dp" />
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="24dp">
 
-        <!-- 输入卡片 -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="#FFFFFF"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:text="视频解析"
+                android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="8dp" />
 
-                <EditText
-                    android:id="@+id/etBvid"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="输入BV号或视频链接"
-                    android:inputType="text"
-                    android:padding="12dp"
-                    android:background="#F0F0F0"
-                    android:textSize="14sp" />
-
-                <Button
-                    android:id="@+id/btnParse"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="解析视频"
-                    android:textSize="15sp"
-                    android:layout_marginTop="12dp"
-                    android:backgroundTint="#FB7299"
-                    android:textColor="#FFFFFF" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- 状态 -->
-        <TextView
-            android:id="@+id/tvBiliStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="等待输入..."
-            android:textSize="14sp"
-            android:textColor="#888888"
-            android:gravity="center"
-            android:layout_marginBottom="12dp" />
-
-        <!-- 视频信息卡片 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardVideoInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="#FFFFFF"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:visibility="gone"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
+            <!-- 输入卡片 -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.MuLing.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_marginBottom="16dp">
 
-                <ImageView
-                    android:id="@+id/ivCover"
-                    android:layout_width="match_parent"
-                    android:layout_height="180dp"
-                    android:scaleType="centerCrop"
-                    android:background="#EEEEEE"
-                    android:layout_marginBottom="12dp" />
-
-                <TextView
-                    android:id="@+id/tvTitle"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333"
-                    android:maxLines="2"
-                    android:ellipsize="end"
-                    android:layout_marginBottom="8dp" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/tvOwner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="13sp"
-                    android:textColor="#666666"
-                    android:layout_marginBottom="4dp" />
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MuLing.TextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="BV 号 / AV 号 / 视频链接"
+                        android:layout_marginBottom="14dp">
 
-                <TextView
-                    android:id="@+id/tvDuration"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="13sp"
-                    android:textColor="#666666"
-                    android:layout_marginBottom="12dp" />
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etBvid"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="BV1xx411c7mD"
+                            android:inputType="text"
+                            android:maxLines="1"
+                            android:textSize="15sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
-                    android:id="@+id/tvDesc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="12sp"
-                    android:textColor="#999999"
-                    android:maxLines="3"
-                    android:ellipsize="end"
-                    android:layout_marginBottom="12dp" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnParse"
+                        style="@style/Widget.MuLing.Button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="解析" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <Button
-                    android:id="@+id/btnPlayInline"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="▶ 内置播放"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:backgroundTint="#4CAF50"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="流地址需带 Referer 头，请勿直接在浏览器打开"
-                    android:textSize="11sp"
-                    android:textColor="#999999"
-                    android:gravity="center"
-                    android:layout_marginBottom="8dp" />
-
-                <Button
-                    android:id="@+id/btnGetPlayUrl"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="获取DASH流地址（高级）"
-                    android:textSize="13sp"
-                    android:backgroundTint="#FB7299"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginBottom="8dp" />
-
-                <Button
-                    android:id="@+id/btnCopyVideoUrl"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="复制视频流地址"
-                    android:textSize="14sp"
-                    android:backgroundTint="#666666"
-                    android:textColor="#FFFFFF"
-                    android:visibility="gone"
-                    android:layout_marginBottom="8dp" />
-
-                <Button
-                    android:id="@+id/btnCopyAudioUrl"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="复制音频流地址"
-                    android:textSize="14sp"
-                    android:backgroundTint="#666666"
-                    android:textColor="#FFFFFF"
-                    android:visibility="gone" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- 分P列表 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardPages"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="#FFFFFF"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:visibility="gone">
-
-            <LinearLayout
+            <!-- 状态 -->
+            <TextView
+                android:id="@+id/tvBiliStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:text="等待输入..."
+                android:textAppearance="@style/TextAppearance.MuLing.Body"
+                android:gravity="center"
+                android:layout_marginBottom="16dp" />
 
-                <TextView
+            <!-- 视频信息卡片 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardVideoInfo"
+                style="@style/Widget.MuLing.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="分P列表"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333"
-                    android:layout_marginBottom="8dp" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/tvPages"
+                    <ImageView
+                        android:id="@+id/ivCover"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/bg_cover"
+                        android:clipToOutline="true"
+                        android:contentDescription="@null"
+                        android:layout_marginBottom="14dp" />
+
+                    <TextView
+                        android:id="@+id/tvTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.MuLing.RowTitle"
+                        android:textSize="17sp"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:layout_marginBottom="6dp" />
+
+                    <TextView
+                        android:id="@+id/tvOwner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/tvDuration"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvDesc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.MuLing.Body"
+                        android:maxLines="3"
+                        android:ellipsize="end"
+                        android:lineSpacingExtra="2dp"
+                        android:layout_marginBottom="14dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPlayInline"
+                        style="@style/Widget.MuLing.Button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="内置播放"
+                        app:icon="@drawable/ic_play"
+                        app:iconGravity="textStart"
+                        android:layout_marginBottom="10dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnGetPlayUrl"
+                        style="@style/Widget.MuLing.Button.Tonal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="获取播放地址"
+                        android:layout_marginBottom="10dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCopyVideoUrl"
+                        style="@style/Widget.MuLing.Button.Tonal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="复制视频流地址"
+                        android:visibility="gone"
+                        android:layout_marginBottom="10dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCopyAudioUrl"
+                        style="@style/Widget.MuLing.Button.Tonal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="复制音频流地址"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 分P卡片 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardPages"
+                style="@style/Widget.MuLing.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="13sp"
-                    android:textColor="#666666" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-    </LinearLayout>
-</ScrollView>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="分P列表"
+                        android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvPages"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.MuLing.Body"
+                        android:lineSpacingExtra="4dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

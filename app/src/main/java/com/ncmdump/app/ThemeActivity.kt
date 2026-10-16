@@ -10,7 +10,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
+import com.google.android.material.button.MaterialButtonToggleGroup
+import com.google.android.material.materialswitch.MaterialSwitch
 
 class ThemeActivity : AppCompatActivity() {
 
@@ -21,10 +22,11 @@ class ThemeActivity : AppCompatActivity() {
     private lateinit var btnThemeSystem: Button
     private lateinit var seekCardOpacity: SeekBar
     private lateinit var tvCardOpacity: TextView
-    private lateinit var switchBlur: SwitchCompat
-    private lateinit var switchCustomBg: SwitchCompat
+    private lateinit var switchBlur: MaterialSwitch
+    private lateinit var switchCustomBg: MaterialSwitch
     private lateinit var btnSelectBg: Button
     private lateinit var btnResetBg: Button
+    private lateinit var themeModeGroup: MaterialButtonToggleGroup
 
     private val pickBackground = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -46,6 +48,7 @@ class ThemeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_theme)
 
+        setSupportActionBar(findViewById(R.id.topAppBar))
         supportActionBar?.title = "主题设置"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -60,6 +63,7 @@ class ThemeActivity : AppCompatActivity() {
         switchCustomBg = findViewById(R.id.switchCustomBg)
         btnSelectBg = findViewById(R.id.btnSelectBg)
         btnResetBg = findViewById(R.id.btnResetBg)
+        themeModeGroup = findViewById(R.id.themeModeGroup)
 
         loadSettings()
         applyCustomBackground()
@@ -132,14 +136,8 @@ class ThemeActivity : AppCompatActivity() {
     }
 
     private fun highlightThemeButton(active: Button) {
-        listOf(btnThemeLight, btnThemeDark, btnThemeSystem).forEach { btn ->
-            if (btn == active) {
-                btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getColor(R.color.primary)))
-                btn.setTextColor(getColor(android.R.color.white))
-            } else {
-                btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getColor(R.color.bg_button)))
-                btn.setTextColor(getColor(R.color.text_primary))
-            }
+        if (themeModeGroup.checkedButtonId != active.id) {
+            themeModeGroup.check(active.id)
         }
     }
 

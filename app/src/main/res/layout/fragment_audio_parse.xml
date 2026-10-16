@@ -4,41 +4,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@android:color/transparent">
+    android:background="@android:color/transparent"
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:paddingBottom="96dp">
-
-        <!-- 标题 -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="音频处理"
-            android:textColor="@color/text_primary"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="网易云 NCM 格式解密"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp"
-            android:layout_marginBottom="20dp" />
+            android:text="NCM 解密"
+            android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="8dp" />
 
         <!-- 权限提示卡片 -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardPermission"
+            style="@style/Widget.MuLing.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
             android:layout_marginBottom="16dp"
             android:visibility="gone">
 
@@ -48,34 +38,46 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="需要权限"
-                    android:textColor="@color/warning"
-                    android:textSize="17sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_shield"
+                        android:tint="?attr/colorError"
+                        android:contentDescription="@null" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="需要权限"
+                        android:textColor="?attr/colorError"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginStart="10dp" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvPermissionHint"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
+                    android:textAppearance="@style/TextAppearance.MuLing.Body"
                     android:lineSpacingExtra="4dp"
                     android:layout_marginBottom="16dp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnGrantPermission"
+                    style="@style/Widget.MuLing.Button"
                     android:layout_width="match_parent"
-                    android:layout_height="46dp"
-                    android:text="授予所有文件访问权限"
-                    android:textSize="14sp"
-                    android:backgroundTint="@color/primary"
-                    android:textColor="#FFFFFF" />
+                    android:layout_height="wrap_content"
+                    android:text="授予所有文件访问权限" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- 操作区域 -->
         <LinearLayout
@@ -85,12 +87,10 @@
             android:orientation="vertical">
 
             <!-- 操作卡片 -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.MuLing.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bg_card"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
                 android:layout_marginBottom="16dp">
 
                 <LinearLayout
@@ -99,44 +99,36 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSelect"
+                        style="@style/Widget.MuLing.Button"
                         android:layout_width="match_parent"
-                        android:layout_height="46dp"
+                        android:layout_height="wrap_content"
                         android:text="选择 NCM 文件"
-                        android:textSize="14sp"
-                        android:backgroundTint="@color/primary"
-                        android:textColor="#FFFFFF"
                         android:layout_marginBottom="10dp" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSelectDir"
+                        style="@style/Widget.MuLing.Button.Tonal"
                         android:layout_width="match_parent"
-                        android:layout_height="46dp"
+                        android:layout_height="wrap_content"
                         android:text="选择输出目录"
-                        android:textSize="14sp"
-                        android:backgroundTint="@color/bg_button"
-                        android:textColor="@color/text_primary"
                         android:layout_marginBottom="10dp" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnDecrypt"
+                        style="@style/Widget.MuLing.Button"
                         android:layout_width="match_parent"
-                        android:layout_height="46dp"
-                        android:text="开始解密"
-                        android:textSize="14sp"
-                        android:backgroundTint="@color/success"
-                        android:textColor="#FFFFFF" />
+                        android:layout_height="wrap_content"
+                        android:text="开始解密" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- 状态卡片 -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.MuLing.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bg_card"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
                 android:layout_marginBottom="16dp">
 
                 <LinearLayout
@@ -146,34 +138,37 @@
                     android:padding="16dp">
 
                     <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="状态"
+                        android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
                         android:id="@+id/tvStatus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="等待选择文件..."
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp"
+                        android:textAppearance="@style/TextAppearance.MuLing.Body"
                         android:lineSpacingExtra="4dp"
-                        android:layout_marginBottom="12dp" />
+                        android:layout_marginBottom="14dp" />
 
-                    <ProgressBar
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
                         android:id="@+id/progressBar"
-                        style="?android:attr/progressBarStyleHorizontal"
                         android:layout_width="match_parent"
-                        android:layout_height="6dp"
+                        android:layout_height="wrap_content"
                         android:max="100"
                         android:progress="0"
-                        android:progressTint="@color/primary"
-                        android:progressBackgroundTint="#D8D2E8" />
+                        app:trackCornerRadius="4dp"
+                        app:trackThickness="6dp" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- 文件列表卡片 -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.MuLing.Card"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bg_card"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -185,8 +180,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="文件列表"
-                        android:textColor="@color/text_hint"
-                        android:textSize="11sp"
+                        android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
                         android:layout_marginBottom="8dp" />
 
                     <TextView
@@ -194,11 +188,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="尚未选择文件"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp"
+                        android:textAppearance="@style/TextAppearance.MuLing.Body"
                         android:lineSpacingExtra="4dp" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

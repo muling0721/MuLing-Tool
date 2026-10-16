@@ -4,39 +4,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@android:color/transparent">
+    android:background="@android:color/transparent"
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:paddingBottom="96dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="视频处理"
-            android:textColor="@color/text_primary"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="哔哩哔哩视频解析下载"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp"
-            android:layout_marginBottom="20dp" />
+            android:text="视频解析"
+            android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="8dp" />
 
         <!-- 输入卡片 -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.MuLing.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
@@ -45,37 +36,31 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MuLing.TextInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="输入 BV 号或链接"
-                    android:textColor="@color/text_hint"
-                    android:textSize="11sp"
-                    android:layout_marginBottom="8dp" />
+                    android:hint="BV 号 / AV 号 / 视频链接"
+                    android:layout_marginBottom="14dp">
 
-                <EditText
-                    android:id="@+id/etBvid"
-                    android:layout_width="match_parent"
-                    android:layout_height="46dp"
-                    android:hint="BV1xx411c7mD"
-                    android:textColor="@color/text_primary"
-                    android:textColorHint="@color/text_hint"
-                    android:background="@drawable/bg_input"
-                    android:paddingHorizontal="14dp"
-                    android:textSize="14sp"
-                    android:inputType="text"
-                    android:layout_marginBottom="12dp" />
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etBvid"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="BV1xx411c7mD"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textSize="15sp" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnParse"
+                    style="@style/Widget.MuLing.Button"
                     android:layout_width="match_parent"
-                    android:layout_height="46dp"
-                    android:text="解析"
-                    android:textSize="14sp"
-                    android:backgroundTint="@color/primary"
-                    android:textColor="#FFFFFF" />
+                    android:layout_height="wrap_content"
+                    android:text="解析" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- 状态 -->
         <TextView
@@ -83,18 +68,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="等待输入..."
-            android:textColor="@color/text_hint"
-            android:textSize="13sp"
+            android:textAppearance="@style/TextAppearance.MuLing.Body"
+            android:gravity="center"
             android:layout_marginBottom="16dp" />
 
         <!-- 视频信息卡片 -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardVideoInfo"
+            style="@style/Widget.MuLing.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
             android:layout_marginBottom="16dp"
             android:visibility="gone">
 
@@ -109,96 +92,88 @@
                     android:layout_width="match_parent"
                     android:layout_height="180dp"
                     android:scaleType="centerCrop"
-                    android:background="@color/bg_button"
-                    android:layout_marginBottom="12dp" />
+                    android:background="@drawable/bg_cover"
+                    android:clipToOutline="true"
+                    android:contentDescription="@null"
+                    android:layout_marginBottom="14dp" />
 
                 <TextView
                     android:id="@+id/tvTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
+                    android:textAppearance="@style/TextAppearance.MuLing.RowTitle"
+                    android:textSize="17sp"
+                    android:maxLines="2"
+                    android:ellipsize="end"
                     android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:id="@+id/tvOwner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
+                    android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
                     android:layout_marginBottom="4dp" />
 
                 <TextView
                     android:id="@+id/tvDuration"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/text_hint"
-                    android:textSize="12sp"
+                    android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:id="@+id/tvDesc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
+                    android:textAppearance="@style/TextAppearance.MuLing.Body"
                     android:maxLines="3"
                     android:ellipsize="end"
                     android:lineSpacingExtra="2dp"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="14dp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPlayInline"
+                    style="@style/Widget.MuLing.Button"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="wrap_content"
                     android:text="内置播放"
-                    android:textSize="14sp"
-                    android:backgroundTint="@color/success"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginBottom="8dp" />
+                    app:icon="@drawable/ic_play"
+                    app:iconGravity="textStart"
+                    android:layout_marginBottom="10dp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnGetPlayUrl"
+                    style="@style/Widget.MuLing.Button.Tonal"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="wrap_content"
                     android:text="获取播放地址"
-                    android:textSize="14sp"
-                    android:backgroundTint="@color/bg_button"
-                    android:textColor="@color/text_primary"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginBottom="10dp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCopyVideoUrl"
+                    style="@style/Widget.MuLing.Button.Tonal"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="wrap_content"
                     android:text="复制视频流地址"
-                    android:textSize="14sp"
-                    android:backgroundTint="@color/bg_button"
-                    android:textColor="@color/text_primary"
                     android:visibility="gone"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginBottom="10dp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCopyAudioUrl"
+                    style="@style/Widget.MuLing.Button.Tonal"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="wrap_content"
                     android:text="复制音频流地址"
-                    android:textSize="14sp"
-                    android:backgroundTint="@color/bg_button"
-                    android:textColor="@color/text_primary"
                     android:visibility="gone" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- 分P卡片 -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardPages"
+            style="@style/Widget.MuLing.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
             android:visibility="gone">
 
             <LinearLayout
@@ -211,18 +186,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="分P列表"
-                    android:textColor="@color/text_hint"
-                    android:textSize="11sp"
+                    android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:id="@+id/tvPages"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
+                    android:textAppearance="@style/TextAppearance.MuLing.Body"
                     android:lineSpacingExtra="4dp" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </ScrollView>

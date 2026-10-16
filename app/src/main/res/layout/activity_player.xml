@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -19,25 +20,25 @@
         android:background="#1A1A1A"
         android:gravity="center">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSave"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="0dp"
-            android:layout_height="44dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:text="保存视频"
             android:textSize="14sp"
-            android:backgroundTint="#4CAF50"
-            android:textColor="#FFFFFF"
             android:layout_marginEnd="8dp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnBack"
+            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="0dp"
-            android:layout_height="44dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:text="返回"
             android:textSize="14sp"
-            android:backgroundTint="#555555"
+            app:strokeColor="#66FFFFFF"
             android:textColor="#FFFFFF" />
     </LinearLayout>
 

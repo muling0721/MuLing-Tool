@@ -4,104 +4,120 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@android:color/transparent">
+    android:background="@android:color/transparent"
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="音频处理"
-            android:textColor="@color/text_primary"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="20dp" />
+            android:text="工具"
+            android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="8dp" />
 
-        <!-- 音频解析 -->
-        <LinearLayout
-            android:id="@+id/menuParse"
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.MuLing.Card"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="?attr/selectableItemBackground"
-            android:padding="16dp"
-            android:layout_marginBottom="12dp">
+            android:layout_height="wrap_content">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="音频解析"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                <!-- 音频解析 -->
+                <LinearLayout
+                    android:id="@+id/menuParse"
+                    style="@style/Widget.MuLing.ListRow">
 
-                <TextView
+                    <ImageView
+                        style="@style/Widget.MuLing.IconBadge"
+                        android:src="@drawable/ic_audio"
+                        android:contentDescription="@null" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="音频解析"
+                            android:textAppearance="@style/TextAppearance.MuLing.RowTitle" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="网易云 NCM 格式解密"
+                            android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_forward"
+                        android:tint="?attr/colorOnSurfaceVariant"
+                        android:contentDescription="@null" />
+                </LinearLayout>
+
+                <View
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="网易云 NCM 格式解密"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
-                    android:layout_marginTop="2dp" />
+                    android:layout_height="1dp"
+                    android:layout_marginStart="72dp"
+                    android:background="?attr/colorOutlineVariant" />
+
+                <!-- 音频转换 -->
+                <LinearLayout
+                    android:id="@+id/menuConvert"
+                    style="@style/Widget.MuLing.ListRow">
+
+                    <ImageView
+                        style="@style/Widget.MuLing.IconBadge"
+                        android:src="@drawable/ic_convert"
+                        android:contentDescription="@null" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="音频转换"
+                            android:textAppearance="@style/TextAppearance.MuLing.RowTitle" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="任意格式互转，支持码率选择"
+                            android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_forward"
+                        android:tint="?attr/colorOnSurfaceVariant"
+                        android:contentDescription="@null" />
+                </LinearLayout>
             </LinearLayout>
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@android:drawable/ic_media_next"
-                android:alpha="0.4" />
-        </LinearLayout>
-
-        <!-- 音频转换 -->
-        <LinearLayout
-            android:id="@+id/menuConvert"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="?attr/selectableItemBackground"
-            android:padding="16dp"
-            android:layout_marginBottom="12dp">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="音频转换"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="任意格式互转，支持码率选择"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
-                    android:layout_marginTop="2dp" />
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@android:drawable/ic_media_next"
-                android:alpha="0.4" />
-        </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </ScrollView>

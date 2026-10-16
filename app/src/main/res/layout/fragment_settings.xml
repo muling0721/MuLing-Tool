@@ -4,31 +4,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@android:color/transparent">
+    android:background="@android:color/transparent"
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:paddingBottom="96dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="设置"
-            android:textColor="@color/text_primary"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="20dp" />
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
 
         <!-- 应用信息卡片 -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.MuLing.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
@@ -39,155 +30,168 @@
                 android:gravity="center_horizontal">
 
                 <ImageView
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
+                    android:layout_width="76dp"
+                    android:layout_height="76dp"
                     android:src="@mipmap/ic_launcher"
-                    android:layout_marginBottom="12dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="MuLing Tool"
-                    android:textColor="@color/text_primary"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:layout_marginBottom="4dp" />
-
-                <TextView
-                    android:id="@+id/tvVersion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="版本 1.4"
-                    android:textColor="@color/text_hint"
-                    android:textSize="13sp"
-                    android:gravity="center"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="by.muling"
-                    android:textColor="@color/primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:gravity="center" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- 主题设置入口 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardThemeSettings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            android:layout_marginBottom="16dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="主题设置"
-                    android:textColor="@color/text_primary"
-                    android:textSize="15sp" />
+                    android:background="@drawable/bg_avatar"
+                    android:padding="14dp"
+                    android:contentDescription="@null"
+                    android:layout_marginBottom="14dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text=">"
-                    android:textColor="@color/text_hint"
-                    android:textSize="18sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                    android:text="@string/app_name"
+                    android:textAppearance="@style/TextAppearance.MuLing.Headline"
+                    android:layout_marginBottom="4dp" />
 
-        <!-- 输出目录卡片 -->
-        <androidx.cardview.widget.CardView
+                <TextView
+                    android:id="@+id/tvVersion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="版本 1.8"
+                    android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="by.muling"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
+            android:text="通用"
+            android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.MuLing.Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="输出目录"
-                    android:textColor="@color/text_hint"
-                    android:textSize="11sp"
-                    android:layout_marginBottom="8dp" />
+                <!-- 主题设置 -->
+                <LinearLayout
+                    android:id="@+id/cardThemeSettings"
+                    style="@style/Widget.MuLing.ListRow">
 
-                <TextView
-                    android:id="@+id/tvOutputDir"
+                    <ImageView
+                        style="@style/Widget.MuLing.IconBadge"
+                        android:src="@drawable/ic_palette"
+                        android:contentDescription="@null" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:text="主题设置"
+                        android:textAppearance="@style/TextAppearance.MuLing.RowTitle" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_forward"
+                        android:tint="?attr/colorOnSurfaceVariant"
+                        android:contentDescription="@null" />
+                </LinearLayout>
+
+                <View
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="默认（应用目录）"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
-                    android:lineSpacingExtra="2dp" />
+                    android:layout_height="1dp"
+                    android:layout_marginStart="72dp"
+                    android:background="?attr/colorOutlineVariant" />
+
+                <!-- 输出目录 -->
+                <LinearLayout
+                    style="@style/Widget.MuLing.ListRow">
+
+                    <ImageView
+                        style="@style/Widget.MuLing.IconBadge"
+                        android:src="@drawable/ic_folder"
+                        android:contentDescription="@null" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="输出目录"
+                            android:textAppearance="@style/TextAppearance.MuLing.RowTitle" />
+
+                        <TextView
+                            android:id="@+id/tvOutputDir"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="默认（应用目录）"
+                            android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="72dp"
+                    android:background="?attr/colorOutlineVariant" />
+
+                <!-- GitHub -->
+                <LinearLayout
+                    android:id="@+id/cardGithub"
+                    style="@style/Widget.MuLing.ListRow">
+
+                    <ImageView
+                        style="@style/Widget.MuLing.IconBadge"
+                        android:src="@drawable/ic_github"
+                        android:contentDescription="@null" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:text="GitHub 项目地址"
+                        android:textAppearance="@style/TextAppearance.MuLing.RowTitle" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_forward"
+                        android:tint="?attr/colorOnSurfaceVariant"
+                        android:contentDescription="@null" />
+                </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <!-- GitHub 项目地址 -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardGithub"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            android:layout_marginBottom="16dp"
-            android:clickable="true"
-            android:focusable="true">
+            android:text="更新"
+            android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="8dp" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="GitHub 项目地址"
-                    android:textColor="@color/text_primary"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=">"
-                    android:textColor="@color/text_hint"
-                    android:textSize="18sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- 更新检测 -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.MuLing.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
@@ -201,54 +205,61 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="14dp">
+
+                    <ImageView
+                        style="@style/Widget.MuLing.IconBadge"
+                        android:src="@drawable/ic_update"
+                        android:contentDescription="@null" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="自动检测更新"
-                            android:textColor="@color/text_primary"
-                            android:textSize="15sp" />
+                            android:textAppearance="@style/TextAppearance.MuLing.RowTitle" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="启动时自动检查 GitHub 最新版本"
-                            android:textColor="@color/text_hint"
-                            android:textSize="12sp"
+                            android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
 
-                    <androidx.appcompat.widget.SwitchCompat
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/switchAutoUpdate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
                 </LinearLayout>
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCheckUpdate"
+                    style="@style/Widget.MuLing.Button.Tonal"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:text="手动检查更新"
-                    android:backgroundTint="@color/primary"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14sp" />
+                    android:layout_height="wrap_content"
+                    android:text="手动检查更新" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <!-- 功能说明卡片 -->
-        <androidx.cardview.widget.CardView
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
+            android:text="关于"
+            android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.MuLing.Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -256,22 +267,34 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="功能说明"
-                    android:textColor="@color/text_hint"
-                    android:textSize="11sp"
-                    android:layout_marginBottom="12dp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="10dp">
+
+                    <ImageView
+                        style="@style/Widget.MuLing.IconBadge"
+                        android:src="@drawable/ic_info"
+                        android:contentDescription="@null" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:text="功能说明"
+                        android:textAppearance="@style/TextAppearance.MuLing.RowTitle" />
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="• 音频处理：网易云 NCM 格式解密，自动写入封面、ID3 元数据和歌词\n\n• 视频处理：哔哩哔哩视频解析、内置播放、下载保存\n\n• 需要授予「所有文件访问权限」才能正常使用"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
+                    android:textAppearance="@style/TextAppearance.MuLing.Body"
                     android:lineSpacingExtra="4dp" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </ScrollView>

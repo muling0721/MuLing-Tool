@@ -4,29 +4,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@android:color/transparent">
+    android:background="@android:color/transparent"
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="音频合并"
-            android:textColor="@color/text_primary"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+            android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="8dp" />
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.MuLing.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
             android:layout_marginBottom="16dp">
 
             <LinearLayout
@@ -39,18 +39,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="选择音频文件（可多选，按顺序合并）"
-                    android:textColor="@color/text_hint"
-                    android:textSize="11sp"
-                    android:layout_marginBottom="8dp" />
+                    android:textAppearance="@style/TextAppearance.MuLing.Body"
+                    android:layout_marginBottom="12dp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSelect"
+                    style="@style/Widget.MuLing.Button"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
+                    android:layout_height="wrap_content"
                     android:text="选择文件"
-                    android:backgroundTint="@color/primary"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14sp"
                     android:layout_marginBottom="12dp" />
 
                 <TextView
@@ -58,27 +55,25 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="未选择文件"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
+                    android:textAppearance="@style/TextAppearance.MuLing.Body"
                     android:lineSpacingExtra="4dp" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnMerge"
+            style="@style/Widget.MuLing.Button"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="wrap_content"
             android:text="开始合并"
-            android:backgroundTint="@color/primary"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
             android:layout_marginBottom="16dp" />
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progressBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            app:trackCornerRadius="4dp"
             android:layout_marginBottom="16dp" />
 
         <TextView
@@ -86,8 +81,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="等待操作..."
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp"
+            android:textAppearance="@style/TextAppearance.MuLing.Body"
             android:lineSpacingExtra="4dp" />
 
     </LinearLayout>

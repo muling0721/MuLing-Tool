@@ -41,6 +41,7 @@ class BiliActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bili)
 
+        setSupportActionBar(findViewById(R.id.topAppBar))
         supportActionBar?.title = "B站视频解析"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 

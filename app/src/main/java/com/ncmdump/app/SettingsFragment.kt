@@ -9,14 +9,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.widget.SwitchCompat
+import com.google.android.material.materialswitch.MaterialSwitch
 import androidx.fragment.app.Fragment
 
 class SettingsFragment : Fragment() {
 
     private lateinit var tvVersion: TextView
     private lateinit var tvOutputDir: TextView
-    private lateinit var switchAutoUpdate: SwitchCompat
+    private lateinit var switchAutoUpdate: MaterialSwitch
     private lateinit var prefs: SharedPreferences
 
     override fun onCreateView(

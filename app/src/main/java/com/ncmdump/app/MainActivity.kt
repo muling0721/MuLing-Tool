@@ -13,12 +13,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var bottomNav: BottomNavigationView
+    private lateinit var topAppBar: MaterialToolbar
     private lateinit var rootView: View
+
+    private val tabTitles = arrayOf("音频处理", "视频处理", "设置")
     private lateinit var prefs: SharedPreferences
 
     private val audioFragment = AudioFragment()
@@ -74,6 +78,7 @@ class MainActivity : AppCompatActivity() {
 
         rootView = findViewById(android.R.id.content)
         bottomNav = findViewById(R.id.bottomNav)
+        topAppBar = findViewById(R.id.topAppBar)
 
         applyGlassEffect(bottomNav)
         applyCardOpacity()
@@ -133,25 +138,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applyGlassEffect(view: View) {
-        val enableBlur = prefs.getBoolean("enable_blur", false)
-        view.elevation = 16f
-
-        if (enableBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // 模糊只应用到背景，不模糊文字：用一个单独的背景 View
-            view.setBackgroundResource(R.drawable.bg_glass)
-        } else {
-            view.setBackgroundResource(R.drawable.bg_glass)
-        }
+        view.elevation = 8f
+        // 使用 Material 3 表面色作为导航栏背景，呈现 KernelSU 同款效果
+        val color = com.google.android.material.color.MaterialColors.getColor(
+            view, com.google.android.material.R.attr.colorSurfaceContainer
+        )
+        view.setBackgroundColor(color)
     }
 
     /**
      * 实时应用卡片不透明度：遍历所有 CardView 修改背景
      */
     private fun applyCardOpacity() {
-        val opacity = prefs.getInt("card_opacity", 88)
+        val opacity = prefs.getInt("card_opacity", 100)
         val alpha = (opacity * 255 / 100).coerceIn(0, 255)
-        // 基础卡片颜色 #EDE7F5，加上透明度
-        val cardColor = Color.argb(alpha, 0xED, 0xE7, 0xF5)
+        // 基于主题表面色应用不透明度，保持 Material 3 观感
+        val base = com.google.android.material.color.MaterialColors.getColor(
+            rootView, com.google.android.material.R.attr.colorSurfaceContainer
+        )
+        val cardColor = androidx.core.graphics.ColorUtils.setAlphaComponent(base, alpha)
 
         rootView.post {
             findAllCardViews(rootView).forEach { cardView ->
@@ -244,6 +249,7 @@ class MainActivity : AppCompatActivity() {
             transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right)
         }
         currentTabIndex = targetIndex
+        topAppBar.title = tabTitles.getOrElse(targetIndex) { getString(R.string.app_name) }
 
         listOf(audioFragment, videoFragment, settingsFragment).forEach {
             if (it.isAdded) transaction.hide(it)

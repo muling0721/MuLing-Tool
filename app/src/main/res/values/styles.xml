@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ===== 卡片 ===== -->
+    <style name="Widget.MuLing.Card" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">?attr/colorSurfaceContainer</item>
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="rippleColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="Widget.MuLing.Card.Outlined" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardBackgroundColor">?attr/colorSurfaceContainerLowest</item>
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">?attr/colorOutlineVariant</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <!-- ===== 文本 ===== -->
+    <style name="TextAppearance.MuLing.SectionLabel" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="TextAppearance.MuLing.Headline" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.MuLing.RowTitle" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.MuLing.RowSubtitle" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <style name="TextAppearance.MuLing.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <!-- ===== 按钮 ===== -->
+    <style name="Widget.MuLing.Button" parent="Widget.Material3.Button">
+        <item name="android:minHeight">52dp</item>
+        <item name="cornerRadius">16dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:letterSpacing">0.01</item>
+    </style>
+
+    <style name="Widget.MuLing.Button.Tonal" parent="Widget.Material3.Button.TonalButton">
+        <item name="android:minHeight">52dp</item>
+        <item name="cornerRadius">16dp</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="Widget.MuLing.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">52dp</item>
+        <item name="cornerRadius">16dp</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <!-- ===== 列表行 ===== -->
+    <style name="Widget.MuLing.ListRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:paddingVertical">14dp</item>
+        <item name="android:minHeight">64dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="Widget.MuLing.IconBadge">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:padding">9dp</item>
+        <item name="android:background">@drawable/bg_icon_badge</item>
+        <item name="android:tint">?attr/colorOnSecondaryContainer</item>
+    </style>
+
+    <!-- ===== 输入框 ===== -->
+    <style name="Widget.MuLing.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">14dp</item>
+        <item name="boxCornerRadiusTopEnd">14dp</item>
+        <item name="boxCornerRadiusBottomStart">14dp</item>
+        <item name="boxCornerRadiusBottomEnd">14dp</item>
+        <item name="boxStrokeColor">?attr/colorPrimary</item>
+        <item name="hintTextColor">?attr/colorPrimary</item>
+        <item name="android:textColorHint">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+</resources>
