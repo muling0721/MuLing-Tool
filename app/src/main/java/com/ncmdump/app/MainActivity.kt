@@ -24,11 +24,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBar: AppBarLayout
     private lateinit var rootView: View
 
-    private val tabTitles = arrayOf("音频处理", "视频处理", "设置")
+    private val tabTitles = arrayOf("音频处理", "视频处理", "短视频", "设置")
     private lateinit var prefs: SharedPreferences
 
     private val audioFragment = AudioFragment()
     private val videoFragment = VideoFragment()
+    private val shortVideoFragment = ShortVideoFragment()
     private val settingsFragment = SettingsFragment()
 
     // 记录当前应用的主题设置，用于检测变化
@@ -104,7 +105,8 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_audio -> { switchFragment(audioFragment, 0); true }
                 R.id.nav_video -> { switchFragment(videoFragment, 1); true }
-                R.id.nav_settings -> { switchFragment(settingsFragment, 2); true }
+                R.id.nav_short -> { switchFragment(shortVideoFragment, 2); true }
+                R.id.nav_settings -> { switchFragment(settingsFragment, 3); true }
                 else -> false
             }
         }
@@ -204,7 +206,7 @@ class MainActivity : AppCompatActivity() {
 
     fun applyCustomBackground() {
         val bgUri = getCustomBackgroundUri()
-        listOf(audioFragment, videoFragment, settingsFragment).forEach { fragment ->
+        listOf(audioFragment, videoFragment, shortVideoFragment, settingsFragment).forEach { fragment ->
             if (fragment.isAdded) {
                 fragment.view?.let { view ->
                     applyBackgroundToView(view, bgUri)
@@ -281,7 +283,7 @@ class MainActivity : AppCompatActivity() {
         currentTabIndex = targetIndex
         topAppBar.title = tabTitles.getOrElse(targetIndex) { getString(R.string.app_name) }
 
-        listOf(audioFragment, videoFragment, settingsFragment).forEach {
+        listOf(audioFragment, videoFragment, shortVideoFragment, settingsFragment).forEach {
             if (it.isAdded) transaction.hide(it)
         }
         if (fragment.isAdded) {
