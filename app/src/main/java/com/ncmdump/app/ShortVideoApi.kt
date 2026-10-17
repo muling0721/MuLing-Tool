@@ -6,16 +6,13 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
-/**
- * 短视频解析（抖音 / 快手）
- *
- * 使用「羽棠小屋」聚合解析接口：
- *   GET https://api.yutangxiaowu.cn/api/v1/mix/video?url=<分享链接>
- *
- * 该接口对不同平台返回不同结构：
- *  - 抖音：{ title, author:{name}, image:[封面...], video:[{file_size, file_url:[...]}] }
- *  - 快手：{ code:0, msg, data:{ video:{title,url,fm}, owner:{name}, image/ images } }
- */
+// 短视频解析（抖音 / 快手）
+//
+// 使用「羽棠小屋」聚合解析接口：
+// GET https://api.yutangxiaowu.cn/api/v1/mix/video?url=分享链接
+//
+// 抖音返回 title / author / image / video(file_url) 结构；
+// 快手返回 code / msg / data(video.url) 结构，App 均已兼容。
 object ShortVideoApi {
 
     private const val API = "https://api.yutangxiaowu.cn/api/v1/mix/video?url="
