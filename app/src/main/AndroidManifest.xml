@@ -39,6 +39,12 @@
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:screenOrientation="sensor" />
 
+        <activity
+            android:name=".ShortVideoPlayerActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="sensor" />
+
         <!-- 媒体播放会话（通知栏 / 锁屏可控） -->
         <service
             android:name=".PlaybackService"

@@ -125,9 +125,11 @@ class ShortVideoFragment : Fragment() {
     }
 
     private fun play(videoUrl: String) {
+        val referer = current?.let { ShortVideoApi.refererFor(it.platform) } ?: ""
         try {
-            startActivity(Intent(requireContext(), PlayerActivity::class.java).apply {
+            startActivity(Intent(requireContext(), ShortVideoPlayerActivity::class.java).apply {
                 putExtra("video_url", videoUrl)
+                putExtra("referer", referer)
                 putExtra("video_title", current?.title.orEmpty())
             })
         } catch (e: Exception) {
@@ -144,6 +146,10 @@ class ShortVideoFragment : Fragment() {
                 .setMimeType("video/mp4")
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 .setDestinationInExternalPublicDir(Environment.DIRECTORY_MOVIES, ShortVideoApi.fileName(result))
+                .addRequestHeader("User-Agent", ShortVideoApi.USER_AGENT)
+            ShortVideoApi.refererFor(result.platform).takeIf { it.isNotEmpty() }?.let {
+                request.addRequestHeader("Referer", it)
+            }
             enqueue(request)
             toast("已加入下载")
         } catch (e: Exception) {

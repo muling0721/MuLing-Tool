@@ -16,8 +16,16 @@ import java.net.URLEncoder
 object ShortVideoApi {
 
     private const val API = "https://api.yutangxiaowu.cn/api/v1/mix/video?url="
-    private const val UA =
+    /** 播放/下载时需携带的 User-Agent */
+    const val USER_AGENT =
         "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120.0 Mobile Safari/537.36"
+
+    /** 各平台 CDN 要求的 Referer */
+    fun refererFor(platform: Platform): String = when (platform) {
+        Platform.DOUYIN -> "https://www.douyin.com/"
+        Platform.KUAISHOU -> "https://www.kuaishou.com/"
+        Platform.UNKNOWN -> ""
+    }
 
     enum class Platform(val label: String) {
         DOUYIN("抖音"),
@@ -164,7 +172,7 @@ object ShortVideoApi {
         conn.connectTimeout = 12000
         conn.readTimeout = 25000
         conn.instanceFollowRedirects = true
-        conn.setRequestProperty("User-Agent", UA)
+        conn.setRequestProperty("User-Agent", USER_AGENT)
         return try {
             if (conn.responseCode != 200) null
             else conn.inputStream.bufferedReader().use { it.readText() }
