@@ -41,6 +41,7 @@ object NeteaseApi {
         private set
 
     private val urlCache = HashMap<String, String>()
+    private val lyricCache = HashMap<String, Lyric>()
 
     /** 关键词搜索 */
     fun search(keyword: String): List<Song> {
@@ -85,12 +86,14 @@ object NeteaseApi {
         val key = "$id:$lv"
         synchronized(urlCache) { urlCache[key]?.let { return it } }
         return try {
-            val page = SONG_PAGE + id
-            val url = PARSE_API + "?url=" + URLEncoder.encode(page, "UTF-8") +
-                "&level=" + lv + "&type=json"
-            val json = JSONObject(httpGet(url))
+            val json = JSONObject(httpGet(parseApiUrl(id, lv)))
             val status = json.optInt("status", -1)
             val playUrl = json.optString("url", "")
+            val lrc = json.optString("lyric", "")
+            val tl = json.optString("tlyric", "")
+            if (lrc.isNotBlank() || tl.isNotBlank()) {
+                synchronized(lyricCache) { lyricCache[id] = Lyric(lrc, tl) }
+            }
             if (status == 200 && playUrl.isNotBlank()) {
                 synchronized(urlCache) { urlCache[key] = playUrl }
                 playUrl
@@ -148,18 +151,39 @@ object NeteaseApi {
         }
     }
 
-    /** 获取歌词（网易云官方接口） */
+    /** 获取歌词：优先使用解析接口返回的 lyric/tlyric，失败再走官方接口 */
     fun fetchLyric(id: String): Lyric? {
+        synchronized(lyricCache) { lyricCache[id]?.let { if (!it.isEmpty) return it } }
+
+        val fromParser = try {
+            val json = JSONObject(httpGet(parseApiUrl(id, level)))
+            val lyric = Lyric(
+                json.optString("lyric", ""),
+                json.optString("tlyric", "")
+            )
+            if (lyric.isEmpty) null else lyric
+        } catch (_: Exception) {
+            null
+        }
+        if (fromParser != null) {
+            synchronized(lyricCache) { lyricCache[id] = fromParser }
+            return fromParser
+        }
+
         return try {
             val json = JSONObject(httpGet("$LYRIC_API$id&lv=-1&tv=-1&rv=-1"))
             val lrc = json.optJSONObject("lrc")?.optString("lyric", "").orEmpty()
             val tl = json.optJSONObject("tlyric")?.optString("lyric", "").orEmpty()
             val lyric = Lyric(lrc, tl)
             if (lyric.isEmpty) null else lyric
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
+
+    private fun parseApiUrl(id: String, lv: String): String =
+        PARSE_API + "?url=" + URLEncoder.encode(SONG_PAGE + id, "UTF-8") +
+            "&level=" + lv + "&type=json"
 
     /** 保存 .lrc 到统一输出目录 */
     fun saveLyric(context: Context, song: Song, content: String): String? {
