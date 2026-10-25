@@ -16,7 +16,7 @@ import androidx.cardview.widget.CardView
 import kotlin.concurrent.thread
 import java.net.URL
 
-class BiliActivity : AppCompatActivity() {
+class BiliActivity : BaseActivity() {
 
     private lateinit var etBvid: EditText
     private lateinit var btnParse: Button

@@ -30,7 +30,7 @@ import kotlin.concurrent.thread
  * 并显示具体错误码便于排查。
  */
 @UnstableApi
-class ShortVideoPlayerActivity : AppCompatActivity() {
+class ShortVideoPlayerActivity : BaseActivity() {
 
     private lateinit var playerView: PlayerView
     private lateinit var progressBar: ProgressBar

@@ -14,7 +14,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.concurrent.thread
 
-class PlayerActivity : AppCompatActivity() {
+class PlayerActivity : BaseActivity() {
 
     private lateinit var webView: WebView
     private lateinit var btnSave: Button

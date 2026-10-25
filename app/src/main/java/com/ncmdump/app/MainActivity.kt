@@ -17,7 +17,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var topAppBar: MaterialToolbar
@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     private val settingsFragment = SettingsFragment()
 
     // 记录当前应用的主题设置，用于检测变化
-    private var currentThemeMode: String = "system"
+    private var themeSignature: String = ""
 
     private val pickFiles = registerForActivityResult(
         ActivityResultContracts.OpenMultipleDocuments()
@@ -65,8 +65,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         prefs = getSharedPreferences("ncmdump", MODE_PRIVATE)
-        currentThemeMode = prefs.getString("theme_mode", "system") ?: "system"
-        applyThemeMode(currentThemeMode)
+        themeSignature = ThemeHelper.themeSignature(this)
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -114,9 +113,9 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         // 检测主题模式变化，变化则 recreate
-        val newMode = prefs.getString("theme_mode", "system") ?: "system"
-        if (newMode != currentThemeMode) {
-            currentThemeMode = newMode
+        val newSignature = ThemeHelper.themeSignature(this)
+        if (newSignature != themeSignature) {
+            themeSignature = newSignature
             recreate()
             return
         }
@@ -124,14 +123,6 @@ class MainActivity : AppCompatActivity() {
         applyCardOpacity()
         applyCustomBackground()
         applyChrome()
-    }
-
-    private fun applyThemeMode(mode: String) {
-        when (mode) {
-            "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        }
     }
 
     /**
@@ -167,33 +158,7 @@ class MainActivity : AppCompatActivity() {
      * 有自定义背景时默认更透明（72%），避免卡片完全挡住背景图。
      */
     fun applyCardOpacity() {
-        val hasBg = getCustomBackgroundUri() != null
-        val opacity = prefs.getInt("card_opacity", if (hasBg) 72 else 100)
-        val alpha = (opacity * 255 / 100).coerceIn(0, 255)
-        // 基于主题表面色应用不透明度，保持 Material 3 观感
-        val base = com.google.android.material.color.MaterialColors.getColor(
-            rootView, com.google.android.material.R.attr.colorSurfaceContainer
-        )
-        val cardColor = androidx.core.graphics.ColorUtils.setAlphaComponent(base, alpha)
-
-        rootView.post {
-            findAllCardViews(rootView).forEach { cardView ->
-                cardView.setCardBackgroundColor(cardColor)
-            }
-        }
-    }
-
-    private fun findAllCardViews(view: View): List<CardView> {
-        val result = mutableListOf<CardView>()
-        if (view is CardView) {
-            result.add(view)
-        }
-        if (view is ViewGroup) {
-            for (i in 0 until view.childCount) {
-                result.addAll(findAllCardViews(view.getChildAt(i)))
-            }
-        }
-        return result
+        ThemeHelper.applyCardOpacity(this)
     }
 
     fun applyCustomBackground() {
@@ -208,34 +173,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun applyBackgroundToView(view: View, bgUri: Uri?) {
-        if (bgUri != null) {
-            try {
-                val inputStream = contentResolver.openInputStream(bgUri)
-                val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
-                inputStream?.close()
-                if (bitmap != null) {
-                    val bitmapDrawable = android.graphics.drawable.BitmapDrawable(resources, bitmap)
-                    bitmapDrawable.gravity = android.view.Gravity.FILL
-                    // 主题色半透明遮罩：让任意明暗的背景图都能与 M3 配色融合，并保证前景内容可读
-                    val surface = com.google.android.material.color.MaterialColors.getColor(
-                        view, com.google.android.material.R.attr.colorSurface
-                    )
-                    val scrim = android.graphics.drawable.ColorDrawable(
-                        androidx.core.graphics.ColorUtils.setAlphaComponent(surface, 0x5A)
-                    )
-                    // 先铺图片，再叠遮罩，最后才是内容（background 永远在子 View 之下）
-                    view.background = android.graphics.drawable.LayerDrawable(
-                        arrayOf(bitmapDrawable, scrim)
-                    )
-                    view.foreground = null
-                    return
-                }
-            } catch (_: Exception) {
-                // 回退到默认背景
-            }
-        }
-        view.setBackgroundResource(R.color.bg_main)
-        view.foreground = null
+        BackgroundHelper.apply(view, bgUri, prefs.getBoolean("enable_blur", false))
     }
 
     fun getCustomBackgroundUri(): Uri? {

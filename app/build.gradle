@@ -12,8 +12,8 @@ android {
         applicationId "com.muling"
         minSdk 24
         targetSdk 34
-        versionCode 35
-        versionName "1.5.1"
+        versionCode 36
+        versionName "1.6"
 
         externalNativeBuild {
             cmake {
@@ -68,7 +68,11 @@ android {
     // APK 输出文件名
     applicationVariants.all { variant ->
         variant.outputs.all {
-            outputFileName = "MuLing-Tool-v${variant.versionName}.apk"
+            outputFileName = if (variant.buildType.name == "debug") {
+                "MuLing-Tool-Beta-v${variant.versionName}.apk"
+            } else {
+                "MuLing-Tool-v${variant.versionName}.apk"
+            }
         }
     }
 }
