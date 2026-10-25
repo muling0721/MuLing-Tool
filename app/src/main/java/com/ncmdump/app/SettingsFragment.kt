@@ -76,8 +76,13 @@ class SettingsFragment : Fragment() {
             prefs.edit().putBoolean("auto_update", checked).apply()
         }
 
-        view.findViewById<View>(R.id.btnCheckUpdate).setOnClickListener {
-            UpdateChecker.checkUpdate(requireContext(), showNoUpdate = true)
+        if (BuildConfig.DEBUG) {
+            view.findViewById<View>(R.id.tvUpdateLabel).visibility = View.GONE
+            view.findViewById<View>(R.id.cardUpdate).visibility = View.GONE
+        } else {
+            view.findViewById<View>(R.id.btnCheckUpdate).setOnClickListener {
+                UpdateChecker.checkUpdate(requireContext(), showNoUpdate = true)
+            }
         }
 
         view.findViewById<View>(R.id.cardThemeSettings).setOnClickListener {

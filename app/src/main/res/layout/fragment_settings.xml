@@ -169,6 +169,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <TextView
+            android:id="@+id/tvUpdateLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="更新"
@@ -177,6 +178,7 @@
             android:layout_marginBottom="8dp" />
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardUpdate"
             style="@style/Widget.MuLing.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
