@@ -1,9 +1,7 @@
 package com.ncmdump.app
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.net.Uri
-import android.os.Environment
 import com.arthenica.ffmpegkit.FFmpegKit
 import java.io.File
 
@@ -12,17 +10,7 @@ object FfmpegHelper {
     val audioFormats = listOf("mp3", "wav", "aac", "flac", "ogg", "m4a", "opus", "wma")
     private val losslessFormats = setOf("wav", "flac")
 
-    private fun getOutputDir(context: Context): File {
-        val prefs: SharedPreferences = context.getSharedPreferences("ncmdump", Context.MODE_PRIVATE)
-        val savedPath = prefs.getString("last_output_dir", "")
-        if (!savedPath.isNullOrEmpty()) {
-            val dir = File(savedPath)
-            if (dir.exists() && dir.isDirectory) return dir
-        }
-        val dir = File(Environment.getExternalStorageDirectory(), "AI区/音频处理")
-        if (!dir.exists()) dir.mkdirs()
-        return dir
-    }
+    private fun getOutputDir(context: Context): File = OutputDir.get(context)
 
     fun convertAudio(
         context: Context,

@@ -1,9 +1,7 @@
 package com.ncmdump.app
 
-import android.app.DownloadManager
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.widget.Button
 import android.widget.ProgressBar
@@ -179,24 +177,12 @@ class ShortVideoPlayerActivity : AppCompatActivity() {
         tvLoadingHint.visibility = TextView.GONE
     }
 
-    @Suppress("DEPRECATION")
     private fun save() {
-        try {
-            val safeTitle = title.ifBlank { "shortvideo_${System.currentTimeMillis()}" }
-                .replace(Regex("[\\\\/:*?\"<>|]"), "_").take(60)
-            val request = DownloadManager.Request(Uri.parse(videoUrl))
-                .setTitle(safeTitle)
-                .setMimeType("video/mp4")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_MOVIES, "$safeTitle.mp4")
-                .addRequestHeader("User-Agent", ShortVideoApi.USER_AGENT)
-            if (referer.isNotEmpty()) request.addRequestHeader("Referer", referer)
-            val dm = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-            dm.enqueue(request)
-            Toast.makeText(this, "已开始下载：$safeTitle.mp4", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Toast.makeText(this, "下载失败：${e.message}", Toast.LENGTH_SHORT).show()
-        }
+        val safeTitle = title.ifBlank { "shortvideo_${System.currentTimeMillis()}" }
+            .replace(Regex("[\\\\/:*?\"<>|]"), "_").take(60)
+        val name = "$safeTitle.mp4"
+        DownloadHelper.download(this, videoUrl, OutputDir.file(this, name), referer)
+        Toast.makeText(this, "已开始下载：$name", Toast.LENGTH_SHORT).show()
     }
 
     private fun releasePlayer() {

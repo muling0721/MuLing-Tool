@@ -2,13 +2,11 @@ package com.ncmdump.app
 
 import android.Manifest
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -26,7 +24,6 @@ import kotlin.concurrent.thread
 class AudioParseFragment : Fragment() {
 
     private lateinit var btnSelect: Button
-    private lateinit var btnSelectDir: Button
     private lateinit var btnDecrypt: Button
     private lateinit var btnGrantPermission: Button
     private lateinit var tvStatus: TextView
@@ -36,10 +33,7 @@ class AudioParseFragment : Fragment() {
     private lateinit var layoutControls: View
     private lateinit var cardPermission: View
 
-    private lateinit var prefs: SharedPreferences
     private val selectedFiles = mutableListOf<Uri>()
-    private var outputDirUri: Uri? = null
-    private var lastOutputPath: String = ""
 
     private val requestLegacyPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -60,15 +54,7 @@ class AudioParseFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        prefs = requireContext().getSharedPreferences("ncmdump", android.content.Context.MODE_PRIVATE)
-        lastOutputPath = prefs.getString("last_output_dir", "") ?: ""
-        val savedUriStr = prefs.getString("last_output_uri", "")
-        if (!savedUriStr.isNullOrEmpty()) {
-            try { outputDirUri = Uri.parse(savedUriStr) } catch (_: Exception) {}
-        }
-
         btnSelect = view.findViewById(R.id.btnSelect)
-        btnSelectDir = view.findViewById(R.id.btnSelectDir)
         btnDecrypt = view.findViewById(R.id.btnDecrypt)
         btnGrantPermission = view.findViewById(R.id.btnGrantPermission)
         tvStatus = view.findViewById(R.id.tvStatus)
@@ -84,12 +70,6 @@ class AudioParseFragment : Fragment() {
             if (!hasStoragePermission()) { showPermissionRequired(); return@setOnClickListener }
             try { (requireActivity() as MainActivity).openFilePicker() }
             catch (e: Exception) { Toast.makeText(requireContext(), "打开文件选择器失败: ${e.message}", Toast.LENGTH_SHORT).show() }
-        }
-
-        btnSelectDir.setOnClickListener {
-            if (!hasStoragePermission()) { showPermissionRequired(); return@setOnClickListener }
-            try { (requireActivity() as MainActivity).openDirPicker() }
-            catch (e: Exception) { Toast.makeText(requireContext(), "打开目录选择器失败: ${e.message}", Toast.LENGTH_SHORT).show() }
         }
 
         btnDecrypt.setOnClickListener {
@@ -124,26 +104,6 @@ class AudioParseFragment : Fragment() {
                 tvStatus.text = "已选择 ${uris.size} 个文件，点击开始解密"
             }
         }
-    }
-
-    // 宿主Activity回调：目录选择结果
-    fun onDirSelected(uri: Uri) {
-        try {
-            requireContext().contentResolver.takePersistableUriPermission(
-                uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            )
-        } catch (_: Exception) {}
-        outputDirUri = uri
-        val path = resolveTreeUriToPath(uri)
-        val editor = prefs.edit()
-        editor.putString("last_output_uri", uri.toString())
-        if (path.isNotEmpty()) {
-            lastOutputPath = path
-            editor.putString("last_output_dir", path)
-        }
-        editor.apply()
-        tvStatus.text = "输出目录: ${getDocumentFileName(uri)}"
     }
 
     private fun checkPermissionAndInit() {
@@ -223,36 +183,7 @@ class AudioParseFragment : Fragment() {
         } catch (e: Exception) { null }
     }
 
-    private fun getOutputDirPath(): String {
-        val defaultDir = requireContext().getExternalFilesDir(null)?.absolutePath ?: requireContext().cacheDir.absolutePath
-        if (lastOutputPath.isNotEmpty()) {
-            val dir = java.io.File(lastOutputPath)
-            if (dir.exists() && dir.isDirectory) return lastOutputPath
-        }
-        outputDirUri?.let { uri ->
-            val path = resolveTreeUriToPath(uri)
-            if (path.isNotEmpty()) {
-                val dir = java.io.File(path)
-                if (dir.exists() && dir.isDirectory) { lastOutputPath = path; return path }
-            }
-        }
-        return defaultDir
-    }
-
-    private fun resolveTreeUriToPath(uri: Uri): String {
-        return try {
-            val docId = DocumentsContract.getTreeDocumentId(uri)
-            val colonIndex = docId.indexOf(':')
-            if (colonIndex < 0) return ""
-            val volume = docId.substring(0, colonIndex)
-            val relPath = docId.substring(colonIndex + 1)
-            when {
-                volume == "primary" -> "${Environment.getExternalStorageDirectory()}/$relPath"
-                volume.matches(Regex("[A-F0-9]{4}-[A-F0-9]{4}")) -> "/storage/$volume/$relPath"
-                else -> "/storage/$volume/$relPath"
-            }
-        } catch (_: Exception) { "" }
-    }
+    private fun getOutputDirPath(): String = OutputDir.get(requireContext()).absolutePath
 
     private fun startDecrypt() {
         btnDecrypt.isEnabled = false

@@ -3,7 +3,6 @@ package com.ncmdump.app
 import org.json.JSONArray
 import org.json.JSONObject
 import android.content.Context
-import android.os.Environment
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -162,20 +161,10 @@ object NeteaseApi {
         }
     }
 
-    /** 保存 .lrc：优先公共音乐目录，失败则退回应用专属目录 */
+    /** 保存 .lrc 到统一输出目录 */
     fun saveLyric(context: Context, song: Song, content: String): String? {
-        val fileName = fileNameFor(song, ".lrc")
-        try {
-            val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
-            if (!dir.exists()) dir.mkdirs()
-            val f = File(dir, fileName)
-            f.writeText(content, Charsets.UTF_8)
-            return f.absolutePath
-        } catch (_: Exception) {
-        }
         return try {
-            val dir = context.getExternalFilesDir(Environment.DIRECTORY_MUSIC) ?: context.filesDir
-            val f = File(dir, fileName)
+            val f = OutputDir.file(context, fileNameFor(song, ".lrc"))
             f.writeText(content, Charsets.UTF_8)
             f.absolutePath
         } catch (_: Exception) {

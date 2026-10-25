@@ -1,6 +1,5 @@
 package com.ncmdump.app
 
-import android.app.DownloadManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -8,7 +7,6 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -137,48 +135,26 @@ class ShortVideoFragment : Fragment() {
         }
     }
 
-    @Suppress("DEPRECATION")
     private fun downloadVideo(result: ShortVideoApi.Result) {
         val url = result.videoUrl ?: return
-        try {
-            val request = DownloadManager.Request(Uri.parse(url))
-                .setTitle(result.title.ifBlank { result.platform.label + "视频" })
-                .setMimeType("video/mp4")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_MOVIES, ShortVideoApi.fileName(result))
-                .addRequestHeader("User-Agent", ShortVideoApi.USER_AGENT)
-            ShortVideoApi.refererFor(result.platform).takeIf { it.isNotEmpty() }?.let {
-                request.addRequestHeader("Referer", it)
-            }
-            enqueue(request)
-            toast("已加入下载")
-        } catch (e: Exception) {
-            toast("下载失败：${e.message}")
-        }
+        val name = ShortVideoApi.fileName(result)
+        DownloadHelper.download(
+            requireContext(),
+            url,
+            OutputDir.file(requireContext(), name),
+            ShortVideoApi.refererFor(result.platform)
+        )
+        toast("已开始下载：$name")
     }
 
-    @Suppress("DEPRECATION")
     private fun downloadAllImages(result: ShortVideoApi.Result) {
         if (result.images.isEmpty()) return
-        try {
-            result.images.forEachIndexed { index, img ->
-                val name = "${result.platform.label}_${System.currentTimeMillis()}_$index.jpg"
-                val request = DownloadManager.Request(Uri.parse(img))
-                    .setTitle(name)
-                    .setMimeType("image/jpeg")
-                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    .setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, name)
-                enqueue(request)
-            }
-            toast("已加入 ${result.images.size} 张图片下载")
-        } catch (e: Exception) {
-            toast("下载失败：${e.message}")
+        val stamp = System.currentTimeMillis()
+        result.images.forEachIndexed { index, img ->
+            val name = "${result.platform.label}_${stamp}_$index.jpg"
+            DownloadHelper.download(requireContext(), img, OutputDir.file(requireContext(), name))
         }
-    }
-
-    private fun enqueue(request: DownloadManager.Request) {
-        val dm = requireContext().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        dm.enqueue(request)
+        toast("已开始下载 ${result.images.size} 张图片")
     }
 
     private fun copy(text: String) {

@@ -43,14 +43,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val pickDir = registerForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        uri?.let {
-            audioFragment.onDirSelected(it)
-        }
-    }
-
     private val pickBackground = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -265,11 +257,6 @@ class MainActivity : AppCompatActivity() {
 
     fun openFilePicker() {
         try { pickFiles.launch(arrayOf("*/*")) }
-        catch (e: Exception) { e.printStackTrace() }
-    }
-
-    fun openDirPicker() {
-        try { pickDir.launch(null) }
         catch (e: Exception) { e.printStackTrace() }
     }
 

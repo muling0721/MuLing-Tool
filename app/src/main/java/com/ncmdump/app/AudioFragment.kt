@@ -80,12 +80,6 @@ class AudioFragment : Fragment() {
         }
     }
 
-    // 宿主Activity回调：目录选择结果
-    fun onDirSelected(uri: Uri) {
-        val child = getVisibleChild() ?: currentChild
-        (child as? AudioParseFragment)?.onDirSelected(uri)
-    }
-
     // 菜单Fragment
     class MenuFragment : Fragment() {
         override fun onCreateView(

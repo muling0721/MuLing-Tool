@@ -1,7 +1,6 @@
 package com.ncmdump.app
 
 import android.os.Bundle
-import android.os.Environment
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -139,35 +138,9 @@ class PlayerActivity : AppCompatActivity() {
                 val safeTitle = videoTitle.replace(Regex("[\\\\/:*?\"<>|]"), "_").take(50)
                 val fileName = "$safeTitle.mp4"
 
-                // 用 MediaStore 写入公共 Movies 目录
-                val resolver = contentResolver
-                val contentValues = android.content.ContentValues().apply {
-                    put(android.provider.MediaStore.Video.Media.DISPLAY_NAME, fileName)
-                    put(android.provider.MediaStore.Video.Media.MIME_TYPE, "video/mp4")
-                    put(android.provider.MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
-                }
-
-                val uri = resolver.insert(android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
-                if (uri == null) {
-                    runOnUiThread {
-                        Toast.makeText(this@PlayerActivity, "创建文件失败", Toast.LENGTH_LONG).show()
-                        resetSaveButton()
-                    }
-                    conn.disconnect()
-                    isSaving = false
-                    return@thread
-                }
-
-                val outputStream = resolver.openOutputStream(uri)
-                if (outputStream == null) {
-                    runOnUiThread {
-                        Toast.makeText(this@PlayerActivity, "打开输出流失败", Toast.LENGTH_LONG).show()
-                        resetSaveButton()
-                    }
-                    conn.disconnect()
-                    isSaving = false
-                    return@thread
-                }
+                val outFile = OutputDir.file(this, fileName)
+                outFile.parentFile?.mkdirs()
+                val outputStream = FileOutputStream(outFile)
 
                 val input = conn.inputStream
                 val buffer = ByteArray(8192)
@@ -194,16 +167,8 @@ class PlayerActivity : AppCompatActivity() {
                 input.close()
                 conn.disconnect()
 
-                // 通知媒体库更新
-                contentValues.clear()
-                contentValues.put(android.provider.MediaStore.Video.Media.SIZE, total)
-                resolver.update(uri, contentValues, null, null)
-
-                // 获取真实路径
-                val realPath = getRealPathFromUri(uri)
-
                 runOnUiThread {
-                    Toast.makeText(this@PlayerActivity, "下载完成: $realPath", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@PlayerActivity, "下载完成: ${outFile.absolutePath}", Toast.LENGTH_LONG).show()
                     resetSaveButton()
                 }
             } catch (e: Exception) {
@@ -217,41 +182,12 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
-    @Suppress("DEPRECATION")
     private fun saveDirectVideo() {
-        try {
-            val safeTitle = videoTitle.ifBlank { "shortvideo_${System.currentTimeMillis()}" }
-                .replace(Regex("[\\\\/:*?\"<>|]"), "_").take(60)
-            val request = android.app.DownloadManager.Request(android.net.Uri.parse(directUrl))
-                .setTitle(safeTitle)
-                .setMimeType("video/mp4")
-                .setNotificationVisibility(
-                    android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
-                )
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_MOVIES, "$safeTitle.mp4")
-            val dm = getSystemService(android.content.Context.DOWNLOAD_SERVICE) as android.app.DownloadManager
-            dm.enqueue(request)
-            Toast.makeText(this, "已开始下载：$safeTitle.mp4", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Toast.makeText(this, "下载失败：${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun getRealPathFromUri(uri: android.net.Uri): String {
-        return try {
-            val projection = arrayOf(android.provider.MediaStore.Video.Media.DATA)
-            val cursor = contentResolver.query(uri, projection, null, null, null)
-            if (cursor != null && cursor.moveToFirst()) {
-                val colIndex = cursor.getColumnIndexOrThrow(android.provider.MediaStore.Video.Media.DATA)
-                val path = cursor.getString(colIndex)
-                cursor.close()
-                path ?: uri.toString()
-            } else {
-                uri.toString()
-            }
-        } catch (_: Exception) {
-            uri.toString()
-        }
+        val safeTitle = videoTitle.ifBlank { "shortvideo_${System.currentTimeMillis()}" }
+            .replace(Regex("[\\\\/:*?\"<>|]"), "_").take(60)
+        val name = "$safeTitle.mp4"
+        DownloadHelper.download(this, directUrl, OutputDir.file(this, name), "https://www.bilibili.com/")
+        Toast.makeText(this, "已开始下载：$name", Toast.LENGTH_SHORT).show()
     }
 
     private fun resetSaveButton() {

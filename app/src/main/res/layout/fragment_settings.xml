@@ -116,6 +116,7 @@
 
                 <!-- 输出目录 -->
                 <LinearLayout
+                    android:id="@+id/cardOutputDir"
                     style="@style/Widget.MuLing.ListRow">
 
                     <ImageView

@@ -1,7 +1,6 @@
 package com.ncmdump.app
 
 import android.Manifest
-import android.app.DownloadManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.ComponentName
@@ -11,7 +10,6 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -376,20 +374,9 @@ class NeteaseFragment : Fragment() {
                     toast("解析失败：${NeteaseApi.lastError.ifEmpty { "该歌曲暂不可播放" }}")
                     return@runOnUiThread
                 }
-                try {
-                    val fileName = NeteaseApi.fileNameFor(song, ".mp3")
-                    val request = DownloadManager.Request(Uri.parse(direct))
-                        .setTitle(song.name)
-                        .setDescription(song.artist)
-                        .setMimeType("audio/mpeg")
-                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                        .setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC, fileName)
-                    val dm = ctx.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                    dm.enqueue(request)
-                    toast("已加入下载：$fileName")
-                } catch (e: Exception) {
-                    toast("下载失败：${e.message}")
-                }
+                val fileName = NeteaseApi.fileNameFor(song, ".mp3")
+                DownloadHelper.download(ctx, direct, OutputDir.file(ctx, fileName), "https://music.163.com/")
+                toast("已开始下载：$fileName")
             }
         }
         // 顺便把歌词也存下来
