@@ -24,6 +24,16 @@ class SettingsFragment : Fragment() {
     private lateinit var switchAutoUpdate: MaterialSwitch
     private lateinit var prefs: SharedPreferences
 
+    private val themeLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK &&
+                prefs.getBoolean("theme_changed", false)
+            ) {
+                prefs.edit().putBoolean("theme_changed", false).apply()
+                requireActivity().recreate()
+            }
+        }
+
     private val pickDir = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         val ctx = context ?: return@registerForActivityResult
         uri ?: return@registerForActivityResult
@@ -77,7 +87,7 @@ class SettingsFragment : Fragment() {
         }
 
         view.findViewById<View>(R.id.cardThemeSettings).setOnClickListener {
-            startActivity(Intent(requireContext(), ThemeActivity::class.java))
+            themeLauncher.launch(Intent(requireContext(), ThemeActivity::class.java))
         }
 
         view.findViewById<View>(R.id.cardGithub).setOnClickListener {
