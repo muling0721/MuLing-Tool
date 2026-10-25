@@ -4,22 +4,16 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.materialswitch.MaterialSwitch
 
 class ThemeActivity : BaseActivity() {
 
     private lateinit var prefs: SharedPreferences
 
-    private lateinit var btnLight: Button
-    private lateinit var btnDark: Button
-    private lateinit var btnSystem: Button
-    private lateinit var modeGroup: MaterialButtonToggleGroup
     private lateinit var switchDynamic: MaterialSwitch
     private lateinit var switchBackground: MaterialSwitch
     private lateinit var switchBlur: MaterialSwitch
@@ -56,10 +50,6 @@ class ThemeActivity : BaseActivity() {
 
         prefs = getSharedPreferences("ncmdump", MODE_PRIVATE)
 
-        btnLight = findViewById(R.id.btnThemeLight)
-        btnDark = findViewById(R.id.btnThemeDark)
-        btnSystem = findViewById(R.id.btnThemeSystem)
-        modeGroup = findViewById(R.id.themeModeGroup)
         switchDynamic = findViewById(R.id.switchDynamicColor)
         switchBackground = findViewById(R.id.switchCustomBg)
         switchBlur = findViewById(R.id.switchBlur)
@@ -69,10 +59,6 @@ class ThemeActivity : BaseActivity() {
         tvOpacity = findViewById(R.id.tvCardOpacity)
 
         load()
-
-        btnLight.setOnClickListener { setMode("light") }
-        btnDark.setOnClickListener { setMode("dark") }
-        btnSystem.setOnClickListener { setMode("system") }
 
         switchDynamic.setOnCheckedChangeListener { _, checked ->
             markChanged()
@@ -134,12 +120,6 @@ class ThemeActivity : BaseActivity() {
     }
 
     private fun load() {
-        when (prefs.getString("theme_mode", "system")) {
-            "light" -> highlight(btnLight)
-            "dark" -> highlight(btnDark)
-            else -> highlight(btnSystem)
-        }
-
         val dynamic = prefs.getBoolean("use_dynamic_color", false)
         switchDynamic.isChecked = dynamic
 
@@ -170,24 +150,10 @@ class ThemeActivity : BaseActivity() {
         tvOpacity.text = "$opacity%"
     }
 
-    private fun setMode(mode: String) {
-        markChanged()
-        ThemeHelper.setThemeMode(this, mode)
-        when (mode) {
-            "light" -> highlight(btnLight)
-            "dark" -> highlight(btnDark)
-            else -> highlight(btnSystem)
-        }
-    }
-
     private fun setColor(name: String) {
         markChanged()
         ThemeHelper.setSeedColor(this, ThemeHelper.seedFor(name))
         recreate()
-    }
-
-    private fun highlight(button: Button) {
-        if (modeGroup.checkedButtonId != button.id) modeGroup.check(button.id)
     }
 
     private fun markChanged() {

@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Build
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.MaterialColors
@@ -36,17 +35,6 @@ object ThemeHelper {
         if (useDynamic(activity)) return
         val name = seedName(prefs(activity).getInt("theme_seed_color", DEFAULT_SEED))
         activity.theme.applyStyle(overlayFor(name), true)
-    }
-
-    fun setThemeMode(context: Context, mode: String) {
-        prefs(context).edit().putString("theme_mode", mode).apply()
-        AppCompatDelegate.setDefaultNightMode(
-            when (mode) {
-                "light" -> AppCompatDelegate.MODE_NIGHT_NO
-                "dark" -> AppCompatDelegate.MODE_NIGHT_YES
-                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            }
-        )
     }
 
     fun setSeedColor(context: Context, seed: Int) {

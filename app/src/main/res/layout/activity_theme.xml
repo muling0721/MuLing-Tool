@@ -44,53 +44,10 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="外观"
+                android:text="主题颜色"
                 android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
                 android:layout_marginStart="4dp"
                 android:layout_marginBottom="8dp" />
-
-            <com.google.android.material.card.MaterialCardView
-                style="@style/Widget.MuLing.Card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
-
-                <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/themeModeGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="6dp"
-                    app:singleSelection="true"
-                    app:selectionRequired="true">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnThemeLight"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="浅色"
-                        android:textSize="13sp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnThemeDark"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="深色"
-                        android:textSize="13sp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnThemeSystem"
-                        style="@style/Widget.Material3.Button.TonalButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="跟随系统"
-                        android:textSize="13sp" />
-                </com.google.android.material.button.MaterialButtonToggleGroup>
-            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
                 style="@style/Widget.MuLing.Card"
