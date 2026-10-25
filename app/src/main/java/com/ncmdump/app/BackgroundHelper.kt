@@ -8,12 +8,16 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.view.View
+import java.io.File
+import java.io.FileOutputStream
 import kotlin.concurrent.thread
 import kotlin.math.max
 import kotlin.math.min
 
 object BackgroundHelper {
 
+    private const val CACHE_FILE = "bg_cache.jpg"
+    private const val CACHE_KEY = "bg_cache_key"
     private val tokens = HashMap<View, String>()
 
     fun apply(view: View, uri: Uri?, blurStrength: Int) {
@@ -31,6 +35,14 @@ object BackgroundHelper {
         val height = view.height.takeIf { it > 0 }
             ?: view.resources.displayMetrics.heightPixels
         val appContext = view.context.applicationContext
+        val fullKey = "$key:$width:$height"
+
+        // 优先用上次处理好的缓存，启动时直接显示，避免等 1 秒
+        val cached = loadCache(appContext, fullKey)
+        if (cached != null) {
+            setBackground(view, cached)
+            return
+        }
 
         thread {
             val bitmap = decode(appContext, uri, width, height)
@@ -39,6 +51,7 @@ object BackgroundHelper {
                 blurStrength > 0 -> blurSmall(bitmap, blurStrength)
                 else -> bitmap
             }
+            if (shown != null) saveCache(appContext, shown, fullKey)
 
             view.post {
                 synchronized(tokens) {
@@ -50,15 +63,38 @@ object BackgroundHelper {
                 if (shown == null || shown.isRecycled) {
                     view.setBackgroundResource(R.color.bg_main)
                     view.foreground = null
-                    return@post
+                } else {
+                    setBackground(view, shown)
                 }
-                val layers = arrayOf<Drawable>(
-                    CenterCropDrawable(shown),
-                    ColorDrawable(ThemeHelper.scrimColor(view))
-                )
-                view.background = LayerDrawable(layers)
-                view.foreground = null
             }
+        }
+    }
+
+    private fun setBackground(view: View, bitmap: Bitmap) {
+        val layers = arrayOf<Drawable>(
+            CenterCropDrawable(bitmap),
+            ColorDrawable(ThemeHelper.scrimColor(view))
+        )
+        view.background = LayerDrawable(layers)
+        view.foreground = null
+    }
+
+    private fun loadCache(context: Context, key: String): Bitmap? {
+        val prefs = context.getSharedPreferences("ncmdump", Context.MODE_PRIVATE)
+        if (prefs.getString(CACHE_KEY, "") != key) return null
+        val file = File(context.cacheDir, CACHE_FILE)
+        if (!file.exists()) return null
+        return runCatching { BitmapFactory.decodeFile(file.absolutePath) }.getOrNull()
+    }
+
+    private fun saveCache(context: Context, bitmap: Bitmap, key: String) {
+        runCatching {
+            val file = File(context.cacheDir, CACHE_FILE)
+            FileOutputStream(file).use {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 88, it)
+            }
+            context.getSharedPreferences("ncmdump", Context.MODE_PRIVATE)
+                .edit().putString(CACHE_KEY, key).apply()
         }
     }
 
@@ -89,7 +125,6 @@ object BackgroundHelper {
         }
     }
 
-    /** 缩小后做三次盒式模糊，再由 CenterCropDrawable 放大，得到平滑的模糊效果。 */
     private fun blurSmall(src: Bitmap, strength: Int): Bitmap {
         val w = (src.width / 8).coerceAtLeast(1)
         val h = (src.height / 8).coerceAtLeast(1)

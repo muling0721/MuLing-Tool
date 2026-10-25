@@ -22,17 +22,6 @@ object ThemeHelper {
     fun prefs(context: Context) =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-    fun applyNightMode(activity: Activity) {
-        val mode = prefs(activity).getString("theme_mode", "system")
-        AppCompatDelegate.setDefaultNightMode(
-            when (mode) {
-                "light" -> AppCompatDelegate.MODE_NIGHT_NO
-                "dark" -> AppCompatDelegate.MODE_NIGHT_YES
-                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            }
-        )
-    }
-
     fun useDynamic(context: Context): Boolean =
         prefs(context).getBoolean("use_dynamic_color", false) &&
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
