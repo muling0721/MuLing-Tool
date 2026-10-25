@@ -35,10 +35,8 @@ object BackgroundHelper {
         val height = view.height.takeIf { it > 0 }
             ?: view.resources.displayMetrics.heightPixels
         val appContext = view.context.applicationContext
-        val fullKey = "$key:$width:$height"
-
         // 优先用上次处理好的缓存，启动时直接显示，避免等 1 秒
-        val cached = loadCache(appContext, fullKey)
+        val cached = loadCache(appContext, key)
         if (cached != null) {
             setBackground(view, cached)
             return
@@ -51,7 +49,7 @@ object BackgroundHelper {
                 blurStrength > 0 -> blurSmall(bitmap, blurStrength)
                 else -> bitmap
             }
-            if (shown != null) saveCache(appContext, shown, fullKey)
+            if (shown != null) saveCache(appContext, shown, key)
 
             view.post {
                 synchronized(tokens) {

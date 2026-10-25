@@ -195,7 +195,7 @@ class ThemeActivity : BaseActivity() {
     }
 
     private fun applyBackground() {
-        val root = findViewById<View>(android.R.id.content)
+        val root = findViewById<View>(R.id.themeRoot)
         val value = prefs.getString("custom_background", "")
         val uri = if (value.isNullOrEmpty()) null else Uri.parse(value)
         BackgroundHelper.apply(root, uri, ThemeHelper.blurStrength(this))

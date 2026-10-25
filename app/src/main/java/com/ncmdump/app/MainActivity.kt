@@ -38,7 +38,7 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        rootView = findViewById(android.R.id.content)
+        rootView = findViewById(R.id.mainRoot)
         bottomNav = findViewById(R.id.bottomNav)
         topAppBar = findViewById(R.id.topAppBar)
         appBar = findViewById(R.id.appBar)
@@ -71,7 +71,13 @@ class MainActivity : BaseActivity() {
             }
         )
 
-        if (savedInstanceState == null) switchFragment(audioFragment, 0)
+        currentTabIndex = savedInstanceState?.getInt("tab", 0) ?: 0
+        if (savedInstanceState == null) {
+            switchFragment(audioFragment, 0)
+        } else {
+            topAppBar.title = tabTitles.getOrElse(currentTabIndex) { getString(R.string.app_name) }
+            bottomNav.selectedItemId = menuIdOf(currentTabIndex)
+        }
 
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -163,6 +169,13 @@ class MainActivity : BaseActivity() {
             applyCardOpacity()
             if (fragment is AudioFragment) fragment.refreshToolbar()
         }
+    }
+
+    private fun menuIdOf(index: Int): Int = when (index) {
+        0 -> R.id.nav_audio
+        1 -> R.id.nav_video
+        2 -> R.id.nav_short
+        else -> R.id.nav_settings
     }
 
     fun showAudioBack(show: Boolean) {
