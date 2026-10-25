@@ -83,21 +83,7 @@ class VideoFragment : Fragment() {
         cardPages.visibility = CardView.GONE
 
         thread {
-            // extractBvid 可能涉及网络请求（b23.tv 重定向），必须在子线程
-            val bvid = BiliParser.extractBvid(input)
-            if (bvid == null) {
-                requireActivity().runOnUiThread {
-                    btnParse.isEnabled = true
-                    tvBiliStatus.text = "无法识别BV号，请检查输入"
-                }
-                return@thread
-            }
-
-            requireActivity().runOnUiThread {
-                tvBiliStatus.text = "正在解析: $bvid"
-            }
-
-            val info = BiliParser.getVideoInfo(bvid)
+            val info = BiliParser.getVideoInfo(input)
             requireActivity().runOnUiThread {
                 btnParse.isEnabled = true
                 if (info != null) {

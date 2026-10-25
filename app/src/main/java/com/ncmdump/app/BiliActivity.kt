@@ -105,19 +105,13 @@ class BiliActivity : BaseActivity() {
     }
 
     private fun parseVideo(input: String) {
-        val bvid = BiliParser.extractBvid(input)
-        if (bvid == null) {
-            tvBiliStatus.text = "无法识别BV号，请检查输入"
-            return
-        }
-
-        tvBiliStatus.text = "正在解析: $bvid"
+        tvBiliStatus.text = "正在解析..."
         btnParse.isEnabled = false
         cardVideoInfo.visibility = CardView.GONE
         cardPages.visibility = CardView.GONE
 
         thread {
-            val info = BiliParser.getVideoInfo(bvid)
+            val info = BiliParser.getVideoInfo(input)
             runOnUiThread {
                 btnParse.isEnabled = true
                 if (info != null) {
