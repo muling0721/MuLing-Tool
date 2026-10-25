@@ -1,15 +1,30 @@
 package com.ncmdump.app
 
+import android.content.ComponentName
 import android.content.SharedPreferences
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
+import java.net.URL
+import kotlin.concurrent.thread
 
 class MainActivity : BaseActivity() {
 
@@ -18,6 +33,16 @@ class MainActivity : BaseActivity() {
     private lateinit var appBar: AppBarLayout
     private lateinit var rootView: View
     private lateinit var prefs: SharedPreferences
+
+    private lateinit var globalPlayer: View
+    private lateinit var glCover: ImageView
+    private lateinit var glTitle: TextView
+    private lateinit var glArtist: TextView
+    private lateinit var glPlayPause: ImageButton
+
+    private var controllerFuture: ListenableFuture<MediaController>? = null
+    private var controller: MediaController? = null
+    private var playerClosed = false
 
     private val tabTitles = arrayOf("音频处理", "视频处理", "短视频", "设置")
     private val audioFragment = AudioFragment()
@@ -33,6 +58,16 @@ class MainActivity : BaseActivity() {
         if (uris.isNotEmpty()) audioFragment.onFilesSelected(uris)
     }
 
+    private val playerListener = object : Player.Listener {
+        override fun onIsPlayingChanged(isPlaying: Boolean) = updateGlobalPlayer()
+        override fun onPlaybackStateChanged(playbackState: Int) = updateGlobalPlayer()
+        override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) = updateGlobalPlayer()
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            if (mediaItem != null) playerClosed = false
+            updateGlobalPlayer()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         prefs = getSharedPreferences("ncmdump", MODE_PRIVATE)
         super.onCreate(savedInstanceState)
@@ -42,6 +77,26 @@ class MainActivity : BaseActivity() {
         bottomNav = findViewById(R.id.bottomNav)
         topAppBar = findViewById(R.id.topAppBar)
         appBar = findViewById(R.id.appBar)
+
+        globalPlayer = findViewById(R.id.globalPlayer)
+        glCover = findViewById(R.id.glCover)
+        glTitle = findViewById(R.id.glTitle)
+        glArtist = findViewById(R.id.glArtist)
+        glPlayPause = findViewById(R.id.glPlayPause)
+
+        glPlayPause.setOnClickListener {
+            val c = controller ?: return@setOnClickListener
+            if (c.isPlaying) c.pause() else c.play()
+            updateGlobalPlayer()
+        }
+        findViewById<View>(R.id.glClose).setOnClickListener {
+            controller?.apply {
+                stop()
+                clearMediaItems()
+            }
+            playerClosed = true
+            updateGlobalPlayer()
+        }
 
         applyChrome()
         applyCardOpacity()
@@ -90,10 +145,36 @@ class MainActivity : BaseActivity() {
         }
 
         applyCustomBackground()
+        bottomNav.post { positionGlobalPlayer() }
 
         if (prefs.getBoolean("auto_update", true)) {
             UpdateChecker.checkUpdate(this, showNoUpdate = false)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+        val future = MediaController.Builder(this, token).buildAsync()
+        controllerFuture = future
+        future.addListener({
+            val c = try {
+                future.get()
+            } catch (_: Exception) {
+                null
+            } ?: return@addListener
+            controller = c
+            c.addListener(playerListener)
+            updateGlobalPlayer()
+        }, MoreExecutors.directExecutor())
+    }
+
+    override fun onStop() {
+        controller?.removeListener(playerListener)
+        controller = null
+        controllerFuture?.let { MediaController.releaseFuture(it) }
+        controllerFuture = null
+        super.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -106,6 +187,7 @@ class MainActivity : BaseActivity() {
         applyCardOpacity()
         applyCustomBackground()
         applyChrome()
+        positionGlobalPlayer()
     }
 
     fun applyCardOpacity() {
@@ -124,6 +206,46 @@ class MainActivity : BaseActivity() {
     fun openFilePicker() {
         runCatching { pickFiles.launch(arrayOf("*/*")) }
     }
+
+    private fun updateGlobalPlayer() {
+        val c = controller ?: return
+        val item = c.currentMediaItem
+        if (item == null || playerClosed) {
+            globalPlayer.visibility = View.GONE
+            return
+        }
+        globalPlayer.visibility = View.VISIBLE
+        glTitle.text = item.mediaMetadata.title?.toString().orEmpty()
+        glArtist.text = item.mediaMetadata.artist?.toString().orEmpty()
+        glPlayPause.setImageResource(if (c.isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
+        loadGlobalCover(item.mediaMetadata.artworkUri?.toString().orEmpty())
+    }
+
+    private fun loadGlobalCover(url: String) {
+        glCover.tag = url
+        glCover.setImageDrawable(null)
+        if (url.isBlank()) return
+        thread {
+            val bitmap = runCatching {
+                URL(url).openStream().use { BitmapFactory.decodeStream(it) }
+            }.getOrNull()
+            if (bitmap != null) {
+                runOnUiThread {
+                    if (glCover.tag == url) glCover.setImageBitmap(bitmap)
+                }
+            }
+        }
+    }
+
+    private fun positionGlobalPlayer() {
+        if (!::globalPlayer.isInitialized || bottomNav.height <= 0) return
+        val lp = globalPlayer.layoutParams as? ViewGroup.MarginLayoutParams ?: return
+        lp.bottomMargin = bottomNav.height + dp(12)
+        globalPlayer.layoutParams = lp
+    }
+
+    private fun dp(value: Int): Int =
+        (value * resources.displayMetrics.density).toInt()
 
     private fun applyChrome() {
         val surface = com.google.android.material.color.MaterialColors.getColor(
