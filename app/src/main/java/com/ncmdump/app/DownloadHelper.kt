@@ -12,6 +12,7 @@ import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.concurrent.thread
 
 object DownloadHelper {
@@ -21,6 +22,25 @@ object DownloadHelper {
         "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36"
 
     private val mainHandler = Handler(Looper.getMainLooper())
+
+    enum class State { RUNNING, DONE, FAILED }
+    data class Progress(val id: Int, val title: String, val percent: Int, val state: State)
+    interface Listener { fun onProgress(progress: Progress) }
+
+    private val listeners = CopyOnWriteArrayList<Listener>()
+
+    fun addListener(listener: Listener) {
+        if (!listeners.contains(listener)) listeners.add(listener)
+    }
+
+    fun removeListener(listener: Listener) {
+        listeners.remove(listener)
+    }
+
+    private fun emit(id: Int, title: String, percent: Int, state: State) {
+        val progress = Progress(id, title, percent, state)
+        listeners.forEach { runCatching { it.onProgress(progress) } }
+    }
 
     fun download(
         context: Context,
@@ -34,6 +54,7 @@ object DownloadHelper {
         ensureChannel(manager)
         val id = file.absolutePath.hashCode()
         notifyProgress(app, manager, id, title, 0, 0)
+        emit(id, title, 0, State.RUNNING)
 
         thread {
             var ok = false
@@ -85,6 +106,7 @@ object DownloadHelper {
                                         lastPercent = percent
                                         lastTime = now
                                         notifyProgress(app, manager, id, title, percent, 100)
+                                        emit(id, title, percent, State.RUNNING)
                                     }
                                 }
                             }
@@ -98,9 +120,11 @@ object DownloadHelper {
                 ok = true
                 message = file.absolutePath
                 notifyDone(app, manager, id, title)
+                emit(id, title, 100, State.DONE)
             } catch (e: Exception) {
                 message = e.message ?: "下载失败"
                 notifyFailed(app, manager, id, title, message)
+                emit(id, title, 0, State.FAILED)
             }
 
             val finalOk = ok

@@ -31,6 +31,36 @@
                 app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge" />
         </com.google.android.material.appbar.AppBarLayout>
 
+        <LinearLayout
+            android:id="@+id/downloadBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="?attr/colorSurfaceContainer"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/downloadStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textSize="13sp"
+                android:textColor="?attr/colorOnSurface" />
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/downloadProgress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:max="100"
+                app:indicatorColor="?attr/colorPrimary"
+                app:trackColor="?attr/colorSurfaceContainerHighest"
+                app:trackThickness="3dp" />
+        </LinearLayout>
+
         <FrameLayout
             android:id="@+id/fragmentContainer"
             android:layout_width="match_parent"

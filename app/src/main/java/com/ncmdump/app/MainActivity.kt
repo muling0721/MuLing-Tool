@@ -23,6 +23,7 @@ import androidx.media3.session.SessionToken
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import java.net.URL
@@ -41,6 +42,10 @@ class MainActivity : BaseActivity() {
     private lateinit var glTitle: TextView
     private lateinit var glArtist: TextView
     private lateinit var glPlayPause: ImageButton
+    private lateinit var downloadBanner: View
+    private lateinit var downloadStatus: TextView
+    private lateinit var downloadProgress: LinearProgressIndicator
+    private val activeDownloads = HashMap<Int, Pair<String, Int>>()
 
     private var controllerFuture: ListenableFuture<MediaController>? = null
     private var controller: MediaController? = null
@@ -62,6 +67,12 @@ class MainActivity : BaseActivity() {
 
     private val notifPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
+    private val downloadListener = object : DownloadHelper.Listener {
+        override fun onProgress(progress: DownloadHelper.Progress) {
+            runOnUiThread { handleDownloadProgress(progress) }
+        }
+    }
 
     private val playerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) = updateGlobalPlayer()
@@ -88,6 +99,10 @@ class MainActivity : BaseActivity() {
         glTitle = findViewById(R.id.glTitle)
         glArtist = findViewById(R.id.glArtist)
         glPlayPause = findViewById(R.id.glPlayPause)
+        downloadBanner = findViewById(R.id.downloadBanner)
+        downloadStatus = findViewById(R.id.downloadStatus)
+        downloadProgress = findViewById(R.id.downloadProgress)
+        DownloadHelper.addListener(downloadListener)
 
         glPlayPause.setOnClickListener {
             val c = controller ?: return@setOnClickListener
@@ -231,6 +246,57 @@ class MainActivity : BaseActivity() {
         loadGlobalCover(item.mediaMetadata.artworkUri?.toString().orEmpty())
     }
 
+    private fun handleDownloadProgress(progress: DownloadHelper.Progress) {
+        when (progress.state) {
+            DownloadHelper.State.RUNNING -> {
+                activeDownloads[progress.id] = progress.title to progress.percent
+                downloadBanner.visibility = View.VISIBLE
+                renderDownloads()
+            }
+
+            DownloadHelper.State.DONE -> {
+                activeDownloads.remove(progress.id)
+                if (activeDownloads.isEmpty()) {
+                    downloadStatus.text = "下载完成：${progress.title}"
+                    downloadProgress.progress = 100
+                    downloadBanner.postDelayed({
+                        if (activeDownloads.isEmpty()) downloadBanner.visibility = View.GONE
+                    }, 2000)
+                } else {
+                    renderDownloads()
+                }
+            }
+
+            DownloadHelper.State.FAILED -> {
+                activeDownloads.remove(progress.id)
+                if (activeDownloads.isEmpty()) {
+                    downloadStatus.text = "下载失败：${progress.title}"
+                    downloadBanner.postDelayed({
+                        if (activeDownloads.isEmpty()) downloadBanner.visibility = View.GONE
+                    }, 3000)
+                } else {
+                    renderDownloads()
+                }
+            }
+        }
+    }
+
+    private fun renderDownloads() {
+        if (activeDownloads.isEmpty()) {
+            downloadBanner.visibility = View.GONE
+            return
+        }
+        val average = activeDownloads.values.map { it.second }.average().toInt()
+        val label = if (activeDownloads.size == 1) {
+            activeDownloads.values.first().first
+        } else {
+            "共 ${activeDownloads.size} 项"
+        }
+        downloadStatus.text = "下载中 $average% · $label"
+        downloadProgress.progress = average
+        downloadBanner.visibility = View.VISIBLE
+    }
+
     private fun downloadCurrentSong() {
         val c = controller ?: return
         val item = c.currentMediaItem ?: return
@@ -357,5 +423,9 @@ class MainActivity : BaseActivity() {
             topAppBar.setNavigationOnClickListener(null)
             topAppBar.title = tabTitles.getOrElse(currentTabIndex) { getString(R.string.app_name) }
         }
+    }
+    override fun onDestroy() {
+        DownloadHelper.removeListener(downloadListener)
+        super.onDestroy()
     }
 }
