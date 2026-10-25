@@ -68,11 +68,9 @@ android {
     // APK 输出文件名
     applicationVariants.all { variant ->
         variant.outputs.all {
-            outputFileName = if (variant.buildType.name == "debug") {
-                "MuLing-Tool-Beta-v${variant.versionName}.apk"
-            } else {
-                "MuLing-Tool-v${variant.versionName}.apk"
-            }
+            outputFileName = variant.buildType.name == "debug"
+                ? "MuLing-Tool-Beta-v${variant.versionName}.apk"
+                : "MuLing-Tool-v${variant.versionName}.apk"
         }
     }
 }
