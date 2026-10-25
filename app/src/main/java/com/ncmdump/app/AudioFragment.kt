@@ -27,7 +27,9 @@ class AudioFragment : Fragment() {
         }
         childFragmentManager.addOnBackStackChangedListener {
             applyBgToChild()
+            refreshToolbar()
         }
+        view.post { refreshToolbar() }
     }
 
     private fun applyBgToChild() {
@@ -54,7 +56,13 @@ class AudioFragment : Fragment() {
         view?.post {
             applyBgToChild()
             (activity as? MainActivity)?.applyCardOpacity()
+            refreshToolbar()
         }
+    }
+
+    fun refreshToolbar() {
+        val hasChild = childFragmentManager.backStackEntryCount > 0
+        (activity as? MainActivity)?.showAudioBack(hasChild)
     }
 
     fun goBack(): Boolean {

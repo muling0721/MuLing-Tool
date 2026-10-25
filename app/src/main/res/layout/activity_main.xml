@@ -1,48 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="?attr/colorSurface"
     android:fitsSystemWindows="true">
 
-    <!-- 顶栏 -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBar"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
-        app:elevation="0dp"
-        app:liftOnScroll="true">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/topAppBar"
+        <!-- 顶栏 -->
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="wrap_content"
             android:background="?attr/colorSurface"
-            app:title="@string/app_name"
-            app:titleTextColor="?attr/colorOnSurface"
-            app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge" />
-    </com.google.android.material.appbar.AppBarLayout>
+            app:elevation="0dp"
+            app:liftOnScroll="true">
 
-    <!-- 内容 -->
-    <FrameLayout
-        android:id="@+id/fragmentContainer"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/topAppBar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorSurface"
+                app:title="@string/app_name"
+                app:titleTextColor="?attr/colorOnSurface"
+                app:navigationIconTint="?attr/colorOnSurface"
+                app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge" />
+        </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- 底部导航 -->
+        <!-- 内容 -->
+        <FrameLayout
+            android:id="@+id/fragmentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- 悬浮底部导航 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurfaceContainer"
-        app:elevation="3dp"
+        android:layout_gravity="bottom"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_nav_floating"
+        android:backgroundTint="?attr/colorSurfaceContainer"
+        android:clipToOutline="true"
+        android:outlineProvider="background"
+        android:elevation="8dp"
         app:itemIconTint="@color/bottom_nav_color"
         app:itemTextColor="@color/bottom_nav_color"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav" />
 
-</LinearLayout>
+</FrameLayout>

@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -78,13 +79,25 @@ class MainActivity : BaseActivity() {
         applyChrome()
         applyCardOpacity()
 
-        // 返回键处理：先退出音频二级页面
+        // 返回键：二级页 → 返回上一页；其它标签 → 回音频页；音频首页 → 再按一次退出
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            private var lastBack = 0L
+
             override fun handleOnBackPressed() {
                 val audioFrag = supportFragmentManager.fragments.find { it is AudioFragment } as? AudioFragment
-                if (audioFrag != null && audioFrag.goBack()) return
-                isEnabled = false
-                onBackPressedDispatcher.onBackPressed()
+                if (currentTabIndex == 0 && audioFrag != null && audioFrag.goBack()) return
+                if (currentTabIndex != 0) {
+                    bottomNav.selectedItemId = R.id.nav_audio
+                    return
+                }
+                val now = System.currentTimeMillis()
+                if (now - lastBack < 2000) {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                } else {
+                    lastBack = now
+                    Toast.makeText(this@MainActivity, "再按一次退出", Toast.LENGTH_SHORT).show()
+                }
             }
         })
 
@@ -137,20 +150,19 @@ class MainActivity : BaseActivity() {
             rootView, com.google.android.material.R.attr.colorSurfaceContainer
         )
 
-        if (hasBg) {
-            val barColor = androidx.core.graphics.ColorUtils.setAlphaComponent(surface, 0xE6)
-            appBar.setBackgroundColor(barColor)
-            topAppBar.setBackgroundColor(barColor)
-            bottomNav.setBackgroundColor(
-                androidx.core.graphics.ColorUtils.setAlphaComponent(container, 0xE6)
-            )
-            bottomNav.elevation = 8f
+        val barColor = if (hasBg) {
+            androidx.core.graphics.ColorUtils.setAlphaComponent(surface, 0xE6)
         } else {
-            appBar.setBackgroundColor(surface)
-            topAppBar.setBackgroundColor(surface)
-            bottomNav.setBackgroundColor(container)
-            bottomNav.elevation = 3f
+            surface
         }
+        appBar.setBackgroundColor(barColor)
+        topAppBar.setBackgroundColor(barColor)
+
+        val opacity = ThemeHelper.cardOpacity(this)
+        val navAlpha = (opacity * 255 / 100).coerceIn(0, 255)
+        val navColor = androidx.core.graphics.ColorUtils.setAlphaComponent(container, navAlpha)
+        bottomNav.backgroundTintList = android.content.res.ColorStateList.valueOf(navColor)
+        bottomNav.elevation = 8f
     }
 
     /**
@@ -207,6 +219,7 @@ class MainActivity : BaseActivity() {
         }
         currentTabIndex = targetIndex
         topAppBar.title = tabTitles.getOrElse(targetIndex) { getString(R.string.app_name) }
+        if (fragment !is AudioFragment) showAudioBack(false)
 
         listOf(audioFragment, videoFragment, shortVideoFragment, settingsFragment).forEach {
             if (it.isAdded) transaction.hide(it)
@@ -223,6 +236,17 @@ class MainActivity : BaseActivity() {
                 applyBackgroundToView(view, getCustomBackgroundUri())
             }
             applyCardOpacity()
+            if (fragment is AudioFragment) fragment.refreshToolbar()
+        }
+    }
+
+    fun showAudioBack(show: Boolean) {
+        if (show) {
+            topAppBar.setNavigationIcon(R.drawable.ic_arrow_back)
+            topAppBar.setNavigationOnClickListener { audioFragment.goBack() }
+        } else {
+            topAppBar.navigationIcon = null
+            topAppBar.setNavigationOnClickListener(null)
         }
     }
 }

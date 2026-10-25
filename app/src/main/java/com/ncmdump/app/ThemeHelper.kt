@@ -74,9 +74,16 @@ object ThemeHelper {
         prefs(context).edit().putBoolean("use_dynamic_color", enabled).apply()
     }
 
+    fun cardOpacity(context: Context): Int {
+        val p = prefs(context)
+        if (p.contains("card_opacity")) return p.getInt("card_opacity", 100)
+        val hasBg = !p.getString("custom_background", "").isNullOrEmpty()
+        return if (hasBg) 72 else 100
+    }
+
     fun applyCardOpacity(activity: Activity) {
         val root = activity.findViewById<View>(android.R.id.content) ?: return
-        val opacity = prefs(activity).getInt("card_opacity", 100)
+        val opacity = cardOpacity(activity)
         val alpha = (opacity * 255 / 100).coerceIn(0, 255)
         val base = MaterialColors.getColor(
             root,

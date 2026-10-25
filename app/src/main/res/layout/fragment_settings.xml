@@ -13,7 +13,7 @@
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
         android:paddingTop="16dp"
-        android:paddingBottom="24dp">
+        android:paddingBottom="96dp">
 
         <!-- 应用信息卡片 -->
         <com.google.android.material.card.MaterialCardView
@@ -28,15 +28,6 @@
                 android:orientation="vertical"
                 android:padding="24dp"
                 android:gravity="center_horizontal">
-
-                <ImageView
-                    android:layout_width="76dp"
-                    android:layout_height="76dp"
-                    android:src="@mipmap/ic_launcher"
-                    android:background="@drawable/bg_avatar"
-                    android:padding="14dp"
-                    android:contentDescription="@null"
-                    android:layout_marginBottom="14dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -292,7 +283,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• 音频处理：网易云 NCM 格式解密，自动写入封面、ID3 元数据和歌词\n\n• 视频处理：哔哩哔哩视频解析、内置播放、下载保存\n\n• 需要授予「所有文件访问权限」才能正常使用"
+                    android:text="• 音频处理：NCM 解密、格式转换、剪辑、合并\n\n• 网易云：搜索、试听、音质选择、歌词、下载\n\n• 视频处理：B 站解析、内置播放、下载保存\n\n• 短视频：抖音 / 快手解析、播放、无水印下载、图集\n\n• 主题：深浅色、动态取色、主题颜色、自定义背景、背景模糊、卡片透明度\n\n• 输出目录：在设置中选择一次，所有文件统一保存\n\n• 需要授予「所有文件访问权限」才能正常使用"
                     android:textAppearance="@style/TextAppearance.MuLing.Body"
                     android:lineSpacingExtra="4dp" />
             </LinearLayout>
