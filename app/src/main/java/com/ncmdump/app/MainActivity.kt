@@ -233,11 +233,13 @@ class MainActivity : BaseActivity() {
 
     fun showAudioBack(show: Boolean) {
         if (show) {
+            topAppBar.title = ""
             topAppBar.setNavigationIcon(R.drawable.ic_arrow_back)
             topAppBar.setNavigationOnClickListener { audioFragment.goBack() }
         } else {
             topAppBar.navigationIcon = null
             topAppBar.setNavigationOnClickListener(null)
+            topAppBar.title = tabTitles.getOrElse(currentTabIndex) { getString(R.string.app_name) }
         }
     }
 }
