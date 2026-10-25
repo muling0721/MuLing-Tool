@@ -21,6 +21,7 @@
             android:background="?attr/colorSurface"
             app:title="主题设置"
             app:titleTextColor="?attr/colorOnSurface"
+            app:navigationIconTint="?attr/colorOnSurface"
             app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -37,13 +38,12 @@
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
             android:paddingTop="8dp"
-            android:paddingBottom="24dp">
+            android:paddingBottom="32dp">
 
-            <!-- 主题模式 -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="主题模式"
+                android:text="外观"
                 android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
                 android:layout_marginStart="4dp"
                 android:layout_marginBottom="8dp" />
@@ -52,7 +52,7 @@
                 style="@style/Widget.MuLing.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp">
+                android:layout_marginBottom="16dp">
 
                 <com.google.android.material.button.MaterialButtonToggleGroup
                     android:id="@+id/themeModeGroup"
@@ -91,20 +91,11 @@
                 </com.google.android.material.button.MaterialButtonToggleGroup>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 动态取色 -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="动态取色"
-                android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
-                android:layout_marginStart="4dp"
-                android:layout_marginBottom="8dp" />
-
             <com.google.android.material.card.MaterialCardView
                 style="@style/Widget.MuLing.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp">
+                android:layout_marginBottom="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -122,13 +113,13 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="跟随系统壁纸"
+                            android:text="动态取色"
                             android:textAppearance="@style/TextAppearance.MuLing.RowTitle" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="关闭后使用下方主题颜色（Android 12+）"
+                            android:text="跟随系统壁纸（Android 12+）"
                             android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
@@ -140,15 +131,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 主题颜色 -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="主题颜色"
-                android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
-                android:layout_marginStart="4dp"
-                android:layout_marginBottom="8dp" />
-
             <com.google.android.material.card.MaterialCardView
                 style="@style/Widget.MuLing.Card"
                 android:layout_width="match_parent"
@@ -159,92 +141,50 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:padding="16dp">
 
                     <View
                         android:id="@+id/colorPurple"
                         android:layout_width="44dp"
                         android:layout_height="44dp"
-                        android:background="@drawable/circle_color_purple"
-                        android:layout_margin="6dp" />
+                        android:layout_margin="6dp"
+                        android:background="@drawable/circle_color_purple" />
 
                     <View
                         android:id="@+id/colorBlue"
                         android:layout_width="44dp"
                         android:layout_height="44dp"
-                        android:background="@drawable/circle_color_blue"
-                        android:layout_margin="6dp" />
+                        android:layout_margin="6dp"
+                        android:background="@drawable/circle_color_blue" />
 
                     <View
                         android:id="@+id/colorGreen"
                         android:layout_width="44dp"
                         android:layout_height="44dp"
-                        android:background="@drawable/circle_color_green"
-                        android:layout_margin="6dp" />
+                        android:layout_margin="6dp"
+                        android:background="@drawable/circle_color_green" />
 
                     <View
                         android:id="@+id/colorPink"
                         android:layout_width="44dp"
                         android:layout_height="44dp"
-                        android:background="@drawable/circle_color_pink"
-                        android:layout_margin="6dp" />
+                        android:layout_margin="6dp"
+                        android:background="@drawable/circle_color_pink" />
 
                     <View
                         android:id="@+id/colorOrange"
                         android:layout_width="44dp"
                         android:layout_height="44dp"
-                        android:background="@drawable/circle_color_orange"
-                        android:layout_margin="6dp" />
+                        android:layout_margin="6dp"
+                        android:background="@drawable/circle_color_orange" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 卡片不透明度 -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="卡片不透明度"
-                android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
-                android:layout_marginStart="4dp"
-                android:layout_marginBottom="8dp" />
-
-            <com.google.android.material.card.MaterialCardView
-                style="@style/Widget.MuLing.Card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <SeekBar
-                        android:id="@+id/seekCardOpacity"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:max="100"
-                        android:progress="100"
-                        android:progressTint="?attr/colorPrimary"
-                        android:thumbTint="?attr/colorPrimary" />
-
-                    <TextView
-                        android:id="@+id/tvCardOpacity"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="100%"
-                        android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
-                        android:gravity="end"
-                        android:layout_marginTop="4dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- 自定义背景 -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="自定义背景"
+                android:text="背景"
                 android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
                 android:layout_marginStart="4dp"
                 android:layout_marginBottom="8dp" />
@@ -265,19 +205,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="14dp">
-
-                        <ImageView
-                            style="@style/Widget.MuLing.IconBadge"
-                            android:src="@drawable/ic_folder"
-                            android:contentDescription="@null" />
+                        android:gravity="center_vertical">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="16dp"
                             android:text="启用自定义背景"
                             android:textAppearance="@style/TextAppearance.MuLing.RowTitle" />
 
@@ -292,37 +225,23 @@
                         style="@style/Widget.MuLing.Button.Tonal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="选择背景图片"
-                        android:layout_marginBottom="10dp" />
+                        android:layout_marginTop="12dp"
+                        android:text="选择背景图片" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnResetBg"
                         style="@style/Widget.MuLing.Button.Outlined"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
                         android:text="恢复默认背景" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
-            <!-- 效果 -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="效果"
-                android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
-                android:layout_marginStart="4dp"
-                android:layout_marginBottom="8dp" />
-
-            <com.google.android.material.card.MaterialCardView
-                style="@style/Widget.MuLing.Card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="?attr/colorOutlineVariant" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -330,17 +249,11 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
-                        <ImageView
-                            style="@style/Widget.MuLing.IconBadge"
-                            android:src="@drawable/ic_palette"
-                            android:contentDescription="@null" />
-
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="16dp"
-                            android:text="启用模糊"
+                            android:text="背景模糊"
                             android:textAppearance="@style/TextAppearance.MuLing.RowTitle" />
 
                         <com.google.android.material.materialswitch.MaterialSwitch
@@ -364,6 +277,44 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="40%"
+                        android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
+                        android:gravity="end" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="透明度"
+                android:textAppearance="@style/TextAppearance.MuLing.SectionLabel"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.MuLing.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <SeekBar
+                        android:id="@+id/seekCardOpacity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="100"
+                        android:progress="100"
+                        android:progressTint="?attr/colorPrimary"
+                        android:thumbTint="?attr/colorPrimary" />
+
+                    <TextView
+                        android:id="@+id/tvCardOpacity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="100%"
                         android:textAppearance="@style/TextAppearance.MuLing.RowSubtitle"
                         android:gravity="end" />
                 </LinearLayout>

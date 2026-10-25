@@ -7,8 +7,8 @@ open class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.applyNightMode(this)
-        ThemeHelper.applyDynamicColors(this)
+        ThemeHelper.applyDynamic(this)
         super.onCreate(savedInstanceState)
-        ThemeHelper.applyStaticColors(this)
+        ThemeHelper.applyPalette(this)
     }
 }

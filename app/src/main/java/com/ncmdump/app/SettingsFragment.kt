@@ -44,7 +44,7 @@ class SettingsFragment : Fragment() {
             )
         } catch (_: Exception) {
         }
-        val path = resolveTreeUriToPath(uri)
+        val path = treeUriToPath(uri)
         if (path.isBlank()) {
             Toast.makeText(ctx, "无法识别该目录，请选择内部存储中的目录", Toast.LENGTH_LONG).show()
             return@registerForActivityResult
@@ -56,30 +56,24 @@ class SettingsFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_settings, container, false)
-    }
+    ): View? = inflater.inflate(R.layout.fragment_settings, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         prefs = requireContext().getSharedPreferences("ncmdump", android.content.Context.MODE_PRIVATE)
 
         tvVersion = view.findViewById(R.id.tvVersion)
         tvOutputDir = view.findViewById(R.id.tvOutputDir)
         switchAutoUpdate = view.findViewById(R.id.switchAutoUpdate)
 
-        try {
-            val pkgInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
-            tvVersion.text = "版本 ${pkgInfo.versionName}"
-        } catch (_: Exception) {
-            tvVersion.text = "版本 1.5.1"
+        runCatching {
+            val info = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
+            tvVersion.text = "版本 ${info.versionName}"
         }
 
         switchAutoUpdate.isChecked = prefs.getBoolean("auto_update", true)
-        switchAutoUpdate.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit().putBoolean("auto_update", isChecked).apply()
-            Toast.makeText(requireContext(), if (isChecked) "已开启自动检测更新" else "已关闭自动检测更新", Toast.LENGTH_SHORT).show()
+        switchAutoUpdate.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean("auto_update", checked).apply()
         }
 
         view.findViewById<View>(R.id.btnCheckUpdate).setOnClickListener {
@@ -91,8 +85,9 @@ class SettingsFragment : Fragment() {
         }
 
         view.findViewById<View>(R.id.cardGithub).setOnClickListener {
-            val url = "https://github.com/muling0721/MuLing-Tool"
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            startActivity(
+                Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/muling0721/MuLing-Tool"))
+            )
         }
 
         view.findViewById<View>(R.id.cardOutputDir).setOnClickListener {
@@ -110,7 +105,9 @@ class SettingsFragment : Fragment() {
     }
 
     private fun chooseOutputDir() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+            !Environment.isExternalStorageManager()
+        ) {
             Toast.makeText(requireContext(), "请先授予「所有文件访问权限」", Toast.LENGTH_LONG).show()
             try {
                 startActivity(
@@ -118,30 +115,29 @@ class SettingsFragment : Fragment() {
                         .setData(Uri.parse("package:${requireContext().packageName}"))
                 )
             } catch (_: Exception) {
-                try {
-                    startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
-                } catch (_: Exception) {
-                }
+                runCatching { startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)) }
             }
             return
         }
         pickDir.launch(null)
     }
 
-    private fun resolveTreeUriToPath(uri: Uri): String {
-        return try {
-            val docId = DocumentsContract.getTreeDocumentId(uri)
-            val colon = docId.indexOf(':')
-            if (colon < 0) return ""
+    private fun treeUriToPath(uri: Uri): String = try {
+        val docId = DocumentsContract.getTreeDocumentId(uri)
+        val colon = docId.indexOf(':')
+        if (colon < 0) {
+            ""
+        } else {
             val volume = docId.substring(0, colon)
             val rel = docId.substring(colon + 1)
-            val base = when {
-                volume == "primary" -> Environment.getExternalStorageDirectory().absolutePath
-                else -> "/storage/$volume"
+            val base = if (volume == "primary") {
+                Environment.getExternalStorageDirectory().absolutePath
+            } else {
+                "/storage/$volume"
             }
             if (rel.isBlank()) base else "$base/$rel"
-        } catch (_: Exception) {
-            ""
         }
+    } catch (_: Exception) {
+        ""
     }
 }

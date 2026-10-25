@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface"
+    android:background="@android:color/transparent"
     android:fitsSystemWindows="true">
 
     <LinearLayout
@@ -11,7 +11,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- 顶栏 -->
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBar"
             android:layout_width="match_parent"
@@ -31,7 +30,6 @@
                 app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- 内容 -->
         <FrameLayout
             android:id="@+id/fragmentContainer"
             android:layout_width="match_parent"
@@ -39,7 +37,6 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- 悬浮底部导航 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
