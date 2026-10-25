@@ -1,8 +1,5 @@
 package com.ncmdump.app
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -25,8 +22,6 @@ class VideoFragment : Fragment() {
     private lateinit var btnParse: Button
     private lateinit var btnGetPlayUrl: Button
     private lateinit var btnPlayInline: Button
-    private lateinit var btnCopyVideoUrl: Button
-    private lateinit var btnCopyAudioUrl: Button
     private lateinit var tvBiliStatus: TextView
     private lateinit var tvTitle: TextView
     private lateinit var tvOwner: TextView
@@ -38,7 +33,6 @@ class VideoFragment : Fragment() {
     private lateinit var cardPages: CardView
 
     private var currentVideoInfo: BiliParser.VideoInfo? = null
-    private var currentPlayUrl: BiliParser.PlayUrl? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -53,8 +47,6 @@ class VideoFragment : Fragment() {
         btnParse = view.findViewById(R.id.btnParse)
         btnGetPlayUrl = view.findViewById(R.id.btnGetPlayUrl)
         btnPlayInline = view.findViewById(R.id.btnPlayInline)
-        btnCopyVideoUrl = view.findViewById(R.id.btnCopyVideoUrl)
-        btnCopyAudioUrl = view.findViewById(R.id.btnCopyAudioUrl)
         tvBiliStatus = view.findViewById(R.id.tvBiliStatus)
         tvTitle = view.findViewById(R.id.tvTitle)
         tvOwner = view.findViewById(R.id.tvOwner)
@@ -75,26 +67,13 @@ class VideoFragment : Fragment() {
         }
 
         btnGetPlayUrl.setOnClickListener {
-            currentVideoInfo?.let { info -> fetchPlayUrl(info.bvid, info.cid) }
+            currentVideoInfo?.let { info -> downloadVideo(info) }
         }
 
         btnPlayInline.setOnClickListener {
             currentVideoInfo?.let { info -> playInline(info.bvid, info.cid, info.title) }
         }
 
-        btnCopyVideoUrl.setOnClickListener {
-            currentPlayUrl?.let { copyToClipboard("视频流地址", it.videoUrl) }
-        }
-
-        btnCopyAudioUrl.setOnClickListener {
-            currentPlayUrl?.let {
-                if (it.audioUrl.isNotEmpty()) {
-                    copyToClipboard("音频流地址", it.audioUrl)
-                } else {
-                    Toast.makeText(requireContext(), "该视频无独立音频流", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
     }
 
     private fun parseVideo(input: String) {
@@ -159,29 +138,29 @@ class VideoFragment : Fragment() {
             tvPages.text = sb.toString().trimEnd()
         }
 
-        btnCopyVideoUrl.visibility = Button.GONE
-        btnCopyAudioUrl.visibility = Button.GONE
-        currentPlayUrl = null
     }
 
-    private fun fetchPlayUrl(bvid: String, cid: Long) {
-        tvBiliStatus.text = "正在获取播放地址..."
+    private fun downloadVideo(info: BiliParser.VideoInfo) {
+        tvBiliStatus.text = "正在获取下载地址..."
         btnGetPlayUrl.isEnabled = false
-
         thread {
-            val playUrl = BiliParser.getPlayUrl(bvid, cid)
-            requireActivity().runOnUiThread {
+            val playUrl = BiliParser.getDirectPlayUrl(info.bvid, info.cid, qn = 80)
+            activity?.runOnUiThread {
                 btnGetPlayUrl.isEnabled = true
-                if (playUrl != null) {
-                    currentPlayUrl = playUrl
-                    btnCopyVideoUrl.visibility = Button.VISIBLE
-                    if (playUrl.audioUrl.isNotEmpty()) {
-                        btnCopyAudioUrl.visibility = Button.VISIBLE
-                    }
-                    tvBiliStatus.text = "播放地址获取成功 (${playUrl.qualityDesc})"
-                } else {
-                    tvBiliStatus.text = "获取播放地址失败（可能需要登录Cookie）"
+                if (playUrl == null || playUrl.videoUrl.isEmpty()) {
+                    tvBiliStatus.text = "下载失败：无法获取视频地址（可能仅支持 DASH）"
+                    return@runOnUiThread
                 }
+                val name = info.title.ifBlank { info.bvid }
+                    .replace(Regex("[\\/:*?\"<>|]"), "_")
+                    .take(60) + ".mp4"
+                DownloadHelper.download(
+                    requireContext(),
+                    playUrl.videoUrl,
+                    OutputDir.file(requireContext(), name),
+                    "https://www.bilibili.com/"
+                )
+                tvBiliStatus.text = "已开始下载：$name"
             }
         }
     }
@@ -195,10 +174,4 @@ class VideoFragment : Fragment() {
         startActivity(intent)
     }
 
-    private fun copyToClipboard(label: String, text: String) {
-        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText(label, text)
-        clipboard.setPrimaryClip(clip)
-        Toast.makeText(requireContext(), "$label 已复制", Toast.LENGTH_SHORT).show()
-    }
 }

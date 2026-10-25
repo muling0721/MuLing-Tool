@@ -146,25 +146,11 @@
                     style="@style/Widget.MuLing.Button.Tonal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="获取播放地址"
+                    android:text="下载视频"
+                    app:icon="@drawable/ic_download"
+                    app:iconGravity="textStart"
                     android:layout_marginBottom="10dp" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCopyVideoUrl"
-                    style="@style/Widget.MuLing.Button.Tonal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="复制视频流地址"
-                    android:visibility="gone"
-                    android:layout_marginBottom="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCopyAudioUrl"
-                    style="@style/Widget.MuLing.Button.Tonal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="复制音频流地址"
-                    android:visibility="gone" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
