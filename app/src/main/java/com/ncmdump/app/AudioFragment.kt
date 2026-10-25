@@ -26,6 +26,7 @@ class AudioFragment : Fragment() {
                 .commit()
         }
         childFragmentManager.addOnBackStackChangedListener {
+            view?.post { (activity as? MainActivity)?.applyCardOpacity() }
             view?.postDelayed({ refreshToolbar() }, 320)
         }
         view.post { refreshToolbar() }
@@ -44,6 +45,7 @@ class AudioFragment : Fragment() {
             .replace(R.id.audioContent, fragment)
             .addToBackStack(null)
             .commit()
+        view?.post { (activity as? MainActivity)?.applyCardOpacity() }
     }
 
     fun refreshToolbar() {
