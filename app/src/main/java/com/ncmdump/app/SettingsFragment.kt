@@ -24,6 +24,26 @@ class SettingsFragment : Fragment() {
     private lateinit var switchAutoUpdate: MaterialSwitch
     private lateinit var prefs: SharedPreferences
 
+    private val pickDir = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        val ctx = context ?: return@registerForActivityResult
+        uri ?: return@registerForActivityResult
+        try {
+            ctx.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+        } catch (_: Exception) {
+        }
+        val path = resolveTreeUriToPath(uri)
+        if (path.isBlank()) {
+            Toast.makeText(ctx, "无法识别该目录，请选择内部存储中的目录", Toast.LENGTH_LONG).show()
+            return@registerForActivityResult
+        }
+        OutputDir.set(ctx, path)
+        refreshOutputDir()
+        Toast.makeText(ctx, "输出目录：$path", Toast.LENGTH_SHORT).show()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
