@@ -41,6 +41,12 @@ object ThemeHelper {
         }
     }
 
+    fun blurStrength(context: Context): Int {
+        val p = prefs(context)
+        if (!p.getBoolean("enable_blur", false)) return 0
+        return p.getInt("blur_strength", 40).coerceIn(0, 100)
+    }
+
     fun themeSignature(context: Context): String {
         val p = prefs(context)
         return buildString {

@@ -16,8 +16,8 @@ object BackgroundHelper {
 
     private val tokens = HashMap<View, String>()
 
-    fun apply(view: View, uri: Uri?, blur: Boolean) {
-        val key = "${uri?.toString()}:$blur"
+    fun apply(view: View, uri: Uri?, blurStrength: Int) {
+        val key = "${uri?.toString()}:$blurStrength"
         synchronized(tokens) { tokens[view] = key }
 
         if (uri == null) {
@@ -36,7 +36,7 @@ object BackgroundHelper {
             val bitmap = decode(appContext, uri, width, height)
             val shown = when {
                 bitmap == null -> null
-                blur -> blurSmall(bitmap)
+                blurStrength > 0 -> blurSmall(bitmap, blurStrength)
                 else -> bitmap
             }
 
@@ -90,12 +90,12 @@ object BackgroundHelper {
     }
 
     /** 缩小后做三次盒式模糊，再由 CenterCropDrawable 放大，得到平滑的模糊效果。 */
-    private fun blurSmall(src: Bitmap): Bitmap {
+    private fun blurSmall(src: Bitmap, strength: Int): Bitmap {
         val w = (src.width / 8).coerceAtLeast(1)
         val h = (src.height / 8).coerceAtLeast(1)
         val small = Bitmap.createScaledBitmap(src, w, h, true)
         if (small !== src) src.recycle()
-        val radius = max(2, min(w, h) / 14)
+        val radius = max(1, min(w, h) * strength.coerceIn(0, 100) / 900)
         val blurred = boxBlur(small, radius)
         if (blurred !== small) small.recycle()
         return blurred

@@ -22,6 +22,8 @@ class ThemeActivity : BaseActivity() {
     private lateinit var seekCardOpacity: SeekBar
     private lateinit var tvCardOpacity: TextView
     private lateinit var switchBlur: MaterialSwitch
+    private lateinit var seekBlur: SeekBar
+    private lateinit var tvBlurStrength: TextView
     private lateinit var switchCustomBg: MaterialSwitch
     private lateinit var switchDynamicColor: MaterialSwitch
     private lateinit var btnSelectBg: Button
@@ -62,6 +64,8 @@ class ThemeActivity : BaseActivity() {
         seekCardOpacity = findViewById(R.id.seekCardOpacity)
         tvCardOpacity = findViewById(R.id.tvCardOpacity)
         switchBlur = findViewById(R.id.switchBlur)
+        seekBlur = findViewById(R.id.seekBlur)
+        tvBlurStrength = findViewById(R.id.tvBlurStrength)
         switchCustomBg = findViewById(R.id.switchCustomBg)
         switchDynamicColor = findViewById(R.id.switchDynamicColor)
         btnSelectBg = findViewById(R.id.btnSelectBg)
@@ -98,8 +102,22 @@ class ThemeActivity : BaseActivity() {
 
         switchBlur.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean("enable_blur", isChecked).apply()
+            seekBlur.isEnabled = isChecked
             applyCustomBackground()
         }
+
+        seekBlur.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                tvBlurStrength.text = "$progress%"
+                prefs.edit().putInt("blur_strength", progress).apply()
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                applyCustomBackground()
+            }
+        })
 
         switchCustomBg.setOnCheckedChangeListener { _, isChecked ->
             if (!isChecked) {
@@ -136,7 +154,12 @@ class ThemeActivity : BaseActivity() {
         seekCardOpacity.progress = opacity
         tvCardOpacity.text = "$opacity%"
 
-        switchBlur.isChecked = prefs.getBoolean("enable_blur", false)
+        val blurEnabled = prefs.getBoolean("enable_blur", false)
+        switchBlur.isChecked = blurEnabled
+        val blurStrength = prefs.getInt("blur_strength", 40)
+        seekBlur.progress = blurStrength
+        seekBlur.isEnabled = blurEnabled
+        tvBlurStrength.text = "$blurStrength%"
         switchCustomBg.isChecked = hasBg
 
         val dynamic = prefs.getBoolean("use_dynamic_color", false)
@@ -185,7 +208,7 @@ class ThemeActivity : BaseActivity() {
         val root = findViewById<View>(android.R.id.content)
         val bgUriStr = prefs.getString("custom_background", "")
         val uri = if (bgUriStr.isNullOrEmpty()) null else Uri.parse(bgUriStr)
-        BackgroundHelper.apply(root, uri, prefs.getBoolean("enable_blur", false))
+        BackgroundHelper.apply(root, uri, ThemeHelper.blurStrength(this))
     }
 
     override fun onSupportNavigateUp(): Boolean {

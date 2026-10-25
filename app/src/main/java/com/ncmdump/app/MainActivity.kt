@@ -174,18 +174,7 @@ class MainActivity : BaseActivity() {
     }
 
     fun applyCustomBackground() {
-        val bgUri = getCustomBackgroundUri()
-        listOf(audioFragment, videoFragment, shortVideoFragment, settingsFragment).forEach { fragment ->
-            if (fragment.isAdded) {
-                fragment.view?.let { view ->
-                    applyBackgroundToView(view, bgUri)
-                }
-            }
-        }
-    }
-
-    fun applyBackgroundToView(view: View, bgUri: Uri?) {
-        BackgroundHelper.apply(view, bgUri, prefs.getBoolean("enable_blur", false))
+        BackgroundHelper.apply(rootView, getCustomBackgroundUri(), ThemeHelper.blurStrength(this))
     }
 
     fun getCustomBackgroundUri(): Uri? {
@@ -232,9 +221,6 @@ class MainActivity : BaseActivity() {
         transaction.commit()
 
         rootView.post {
-            fragment.view?.let { view ->
-                applyBackgroundToView(view, getCustomBackgroundUri())
-            }
             applyCardOpacity()
             if (fragment is AudioFragment) fragment.refreshToolbar()
         }

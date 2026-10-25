@@ -26,23 +26,17 @@ class AudioFragment : Fragment() {
                 .commit()
         }
         childFragmentManager.addOnBackStackChangedListener {
-            applyBgToChild()
-            refreshToolbar()
+            view?.postDelayed({
+                refreshToolbar()
+                (activity as? MainActivity)?.applyCardOpacity()
+            }, 320)
         }
         view.post { refreshToolbar() }
     }
 
-    private fun applyBgToChild() {
-        val bgUri = (activity as? MainActivity)?.getCustomBackgroundUri()
-        if (bgUri != null) {
-            childFragmentManager.fragments.forEach { frag ->
-                frag.view?.let { (activity as? MainActivity)?.applyBackgroundToView(it, bgUri) }
-            }
-        }
-    }
-
     fun openChild(fragment: Fragment) {
         currentChild = fragment
+        (activity as? MainActivity)?.showAudioBack(true)
         childFragmentManager.beginTransaction()
             .setCustomAnimations(
                 R.anim.nav_enter,
@@ -53,11 +47,6 @@ class AudioFragment : Fragment() {
             .replace(R.id.audioContent, fragment)
             .addToBackStack(null)
             .commit()
-        view?.post {
-            applyBgToChild()
-            (activity as? MainActivity)?.applyCardOpacity()
-            refreshToolbar()
-        }
     }
 
     fun refreshToolbar() {
