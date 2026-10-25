@@ -2,12 +2,12 @@ package com.ncmdump.app
 
 import android.app.Activity
 import android.content.Context
-import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
 import com.google.android.material.color.DynamicColors
+import com.google.android.material.color.DynamicColorsOptions
 import com.google.android.material.color.MaterialColors
 
 object ThemeHelper {
@@ -30,21 +30,15 @@ object ThemeHelper {
 
     fun applyColors(activity: Activity) {
         val p = prefs(activity)
-        val dynamic = p.getBoolean("use_dynamic_color", false)
-        if (dynamic && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (p.getBoolean("use_dynamic_color", false)) {
             DynamicColors.applyToActivityIfAvailable(activity)
         } else {
-            val name = seedName(p.getInt("theme_seed_color", DEFAULT_SEED))
-            activity.theme.applyStyle(overlayFor(name), true)
+            val seed = p.getInt("theme_seed_color", DEFAULT_SEED)
+            val options = DynamicColorsOptions.Builder()
+                .setContentBasedSource(seed)
+                .build()
+            DynamicColors.applyToActivityIfAvailable(activity, options)
         }
-    }
-
-    private fun overlayFor(name: String): Int = when (name) {
-        "purple" -> R.style.ThemeOverlay_LHM_Purple
-        "green" -> R.style.ThemeOverlay_LHM_Green
-        "pink" -> R.style.ThemeOverlay_LHM_Pink
-        "orange" -> R.style.ThemeOverlay_LHM_Orange
-        else -> R.style.ThemeOverlay_LHM_Blue
     }
 
     fun blurStrength(context: Context): Int {

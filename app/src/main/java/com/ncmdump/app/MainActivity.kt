@@ -125,11 +125,6 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (prefs.getBoolean("theme_changed", false)) {
-            prefs.edit().putBoolean("theme_changed", false).apply()
-            recreate()
-            return
-        }
         // 检测主题模式变化，变化则 recreate
         val newSignature = ThemeHelper.themeSignature(this)
         if (newSignature != themeSignature) {

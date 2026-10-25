@@ -85,7 +85,6 @@ class ThemeActivity : BaseActivity() {
         findViewById<View>(R.id.colorOrange).setOnClickListener { setThemeColor("orange") }
 
         switchDynamicColor.setOnCheckedChangeListener { _, isChecked ->
-            markThemeChanged()
             ThemeHelper.setDynamicColor(this, isChecked)
             recreate()
         }
@@ -179,7 +178,6 @@ class ThemeActivity : BaseActivity() {
     }
 
     private fun setThemeMode(mode: String) {
-        markThemeChanged()
         ThemeHelper.setThemeMode(this, mode)
         when (mode) {
             "light" -> highlightThemeButton(btnThemeLight)
@@ -189,7 +187,6 @@ class ThemeActivity : BaseActivity() {
     }
 
     private fun setThemeColor(color: String) {
-        markThemeChanged()
         ThemeHelper.setSeedColor(this, ThemeHelper.seedFor(color))
         Toast.makeText(this, "已应用主题颜色", Toast.LENGTH_SHORT).show()
         recreate()
@@ -212,19 +209,6 @@ class ThemeActivity : BaseActivity() {
         val bgUriStr = prefs.getString("custom_background", "")
         val uri = if (bgUriStr.isNullOrEmpty()) null else Uri.parse(bgUriStr)
         BackgroundHelper.apply(root, uri, ThemeHelper.blurStrength(this))
-    }
-
-    private fun markThemeChanged() {
-        prefs.edit().putBoolean("theme_changed", true).apply()
-    }
-
-    override fun finish() {
-        if (::prefs.isInitialized) {
-            setResult(
-                if (prefs.getBoolean("theme_changed", false)) RESULT_OK else RESULT_CANCELED
-            )
-        }
-        super.finish()
     }
 
     override fun onSupportNavigateUp(): Boolean {
