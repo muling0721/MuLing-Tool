@@ -11,7 +11,7 @@
         android:clipToPadding="false"
         android:paddingHorizontal="16dp"
         android:paddingTop="8dp"
-        android:paddingBottom="96dp">
+        android:paddingBottom="200dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -114,6 +114,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_margin="12dp"
+        android:layout_marginBottom="96dp"
         android:elevation="6dp"
         app:cardElevation="6dp"
         android:visibility="gone">
