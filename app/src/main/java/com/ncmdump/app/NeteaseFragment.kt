@@ -124,6 +124,20 @@ class NeteaseFragment : Fragment() {
         btnDownload.setOnClickListener { currentSong?.let { download(it) } }
         btnClose.setOnClickListener { closePlayer() }
         setupQuality()
+
+        // 迷你播放器按底部导航的实际高度上移，避免重叠
+        view.post {
+            val nav = activity?.findViewById<View>(R.id.bottomNav)
+            nav?.post {
+                if (nav.height > 0) {
+                    val lp = cardPlayer.layoutParams as? ViewGroup.MarginLayoutParams
+                    if (lp != null) {
+                        lp.bottomMargin = nav.height + (24 * resources.displayMetrics.density).toInt()
+                        cardPlayer.layoutParams = lp
+                    }
+                }
+            }
+        }
     }
 
     override fun onStart() {
