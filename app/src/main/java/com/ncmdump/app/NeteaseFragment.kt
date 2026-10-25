@@ -64,6 +64,7 @@ class NeteaseFragment : Fragment() {
     private var currentSong: NeteaseApi.Song? = null
     private var pendingSong: NeteaseApi.Song? = null
     private var searchToken = 0
+    private var playToken = 0
 
     private val notifPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -202,22 +203,37 @@ class NeteaseFragment : Fragment() {
         tvPlayerTitle.text = song.name
         tvPlayerArtist.text = song.artist
         loadPlayerCover(song.cover)
+        tvStatus.text = "正在解析：${song.name}"
 
-        val metadata = MediaMetadata.Builder()
-            .setTitle(song.name)
-            .setArtist(song.artist)
-            .apply { if (song.cover.isNotEmpty()) setArtworkUri(Uri.parse(song.cover)) }
-            .build()
-        val item = MediaItem.Builder()
-            .setMediaId(song.id)
-            .setUri(NeteaseApi.streamUrl(song.id))
-            .setMediaMetadata(metadata)
-            .build()
+        val token = ++playToken
+        thread {
+            val url = NeteaseApi.resolveDirectUrl(song.id)
+            activity?.runOnUiThread {
+                if (token != playToken) return@runOnUiThread
+                if (!c.isConnected) return@runOnUiThread
+                if (url.isNullOrBlank()) {
+                    tvStatus.text = "解析失败：${NeteaseApi.lastError.ifEmpty { "该歌曲暂不可播放" }}"
+                    toast("解析失败")
+                    return@runOnUiThread
+                }
 
-        c.setMediaItem(item)
-        c.prepare()
-        c.play()
-        tvStatus.text = "正在加载：${song.name}"
+                val metadata = MediaMetadata.Builder()
+                    .setTitle(song.name)
+                    .setArtist(song.artist)
+                    .apply { if (song.cover.isNotEmpty()) setArtworkUri(Uri.parse(song.cover)) }
+                    .build()
+                val item = MediaItem.Builder()
+                    .setMediaId(song.id)
+                    .setUri(url)
+                    .setMediaMetadata(metadata)
+                    .build()
+
+                c.setMediaItem(item)
+                c.prepare()
+                c.play()
+                tvStatus.text = "正在加载：${song.name}"
+            }
+        }
     }
 
     private fun togglePlay() {
@@ -315,8 +331,12 @@ class NeteaseFragment : Fragment() {
     private fun copyDirect(song: NeteaseApi.Song) {
         toast("正在解析直链…")
         thread {
-            val direct = NeteaseApi.resolveDirectUrl(song.id) ?: NeteaseApi.streamUrl(song.id)
+            val direct = NeteaseApi.resolveDirectUrl(song.id)
             activity?.runOnUiThread {
+                if (direct.isNullOrBlank()) {
+                    toast("解析失败：${NeteaseApi.lastError.ifEmpty { "该歌曲暂不可播放" }}")
+                    return@runOnUiThread
+                }
                 val cm = requireContext()
                     .getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 cm.setPrimaryClip(ClipData.newPlainText("音乐直链", direct))
@@ -328,20 +348,29 @@ class NeteaseFragment : Fragment() {
     @Suppress("DEPRECATION")
     private fun download(song: NeteaseApi.Song) {
         val ctx = context ?: return
-        try {
-            val fileName = NeteaseApi.fileNameFor(song, ".mp3")
-            val request = DownloadManager.Request(Uri.parse(NeteaseApi.streamUrl(song.id)))
-                .setTitle(song.name)
-                .setDescription(song.artist)
-                .setMimeType("audio/mpeg")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC, fileName)
-            val dm = ctx.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            dm.enqueue(request)
-            toast("已加入下载：$fileName")
-        } catch (e: Exception) {
-            toast("下载失败：${e.message}")
-            return
+        toast("正在解析下载地址…")
+        thread {
+            val direct = NeteaseApi.resolveDirectUrl(song.id)
+            activity?.runOnUiThread {
+                if (direct.isNullOrBlank()) {
+                    toast("解析失败：${NeteaseApi.lastError.ifEmpty { "该歌曲暂不可播放" }}")
+                    return@runOnUiThread
+                }
+                try {
+                    val fileName = NeteaseApi.fileNameFor(song, ".mp3")
+                    val request = DownloadManager.Request(Uri.parse(direct))
+                        .setTitle(song.name)
+                        .setDescription(song.artist)
+                        .setMimeType("audio/mpeg")
+                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                        .setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC, fileName)
+                    val dm = ctx.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                    dm.enqueue(request)
+                    toast("已加入下载：$fileName")
+                } catch (e: Exception) {
+                    toast("下载失败：${e.message}")
+                }
+            }
         }
         // 顺便把歌词也存下来
         thread {

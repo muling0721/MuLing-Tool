@@ -1,5 +1,6 @@
 package com.ncmdump.app
 
+import org.json.JSONArray
 import org.json.JSONObject
 import android.content.Context
 import android.os.Environment
@@ -9,17 +10,20 @@ import java.net.URL
 import java.net.URLEncoder
 
 /**
- * 网易云歌曲解析（在线搜索 + 获取播放直链）
+ * 网易云歌曲解析
  *
- * 接口参考 reference/netease-music/：
- *  - 搜索：https://music.kxlove.top/api/WYY/wyy_search.php?word=关键词 → JSON
- *  - 播放：https://music.kxlove.top/api/WYY/wyy.php?id=歌曲ID       → 302 到音频直链
+ * - 搜索：网易云官方 cloudsearch 接口
+ * - 播放/下载：羽棠小屋 Song_V1 接口（按歌曲页面链接解析出音频直链）
+ * - 歌词：网易云官方歌词接口
  */
 object NeteaseApi {
 
-    private const val SEARCH_API = "https://music.kxlove.top/api/WYY/wyy_search.php?word="
-    private const val PLAY_API = "https://music.kxlove.top/api/WYY/wyy.php?id="
+    private const val SEARCH_API = "https://music.163.com/api/cloudsearch/pc?s="
     private const val LYRIC_API = "https://music.163.com/api/song/lyric?id="
+    private const val PARSE_API = "https://api.yutangxiaowu.cn/api/music/Song_V1"
+    private const val SONG_PAGE = "https://music.163.com/song?id="
+    private const val LEVEL = "standard"
+    private const val REFERER = "https://music.163.com/"
     private const val UA =
         "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36"
 
@@ -35,28 +39,32 @@ object NeteaseApi {
     var lastError: String = ""
         private set
 
+    private val urlCache = HashMap<String, String>()
+
     /** 关键词搜索 */
     fun search(keyword: String): List<Song> {
         lastError = ""
         return try {
-            val url = SEARCH_API + URLEncoder.encode(keyword, "UTF-8")
+            val url = SEARCH_API + URLEncoder.encode(keyword, "UTF-8") + "&type=1&limit=30&offset=0"
             val json = JSONObject(httpGet(url))
-            if (json.optInt("code", -1) != 200) {
+            val result = json.optJSONObject("result")
+            if (result == null) {
                 lastError = json.optString("message", "code=${json.optInt("code")}")
                 return emptyList()
             }
-            val arr = json.optJSONArray("data") ?: return emptyList()
+            val arr = result.optJSONArray("songs") ?: return emptyList()
             val list = ArrayList<Song>(arr.length())
             for (i in 0 until arr.length()) {
                 val o = arr.optJSONObject(i) ?: continue
+                val album = o.optJSONObject("al")
                 list.add(
                     Song(
                         id = o.optString("id", ""),
-                        name = o.optString("song", ""),
-                        artist = o.optString("singer", ""),
-                        album = o.optString("album", ""),
-                        cover = normalizeCover(o.optString("picUrl", "")),
-                        durationMs = o.optLong("duration", 0L)
+                        name = o.optString("name", ""),
+                        artist = joinArtists(o.optJSONArray("ar")),
+                        album = album?.optString("name", "").orEmpty(),
+                        cover = normalizeCover(album?.optString("picUrl", "").orEmpty()),
+                        durationMs = o.optLong("dt", 0L)
                     )
                 )
             }
@@ -67,26 +75,40 @@ object NeteaseApi {
         }
     }
 
-    /** 可直接交给播放器的流地址（内部会 302 到真实音频） */
-    fun streamUrl(id: String): String = PLAY_API + id
-
-    /** 解析 302 后的真实音频直链（用于复制 / 下载） */
+    /**
+     * 解析真实音频直链（带内存缓存）。
+     * 解析接口按歌曲页面链接工作，成功时返回 url 字段。
+     */
     fun resolveDirectUrl(id: String): String? {
+        synchronized(urlCache) { urlCache[id]?.let { return it } }
         return try {
-            val conn = URL(PLAY_API + id).openConnection() as HttpURLConnection
-            conn.instanceFollowRedirects = false
-            conn.requestMethod = "GET"
-            conn.connectTimeout = 10000
-            conn.readTimeout = 10000
-            conn.setRequestProperty("User-Agent", UA)
-            conn.connect()
-            val code = conn.responseCode
-            val loc = conn.getHeaderField("Location")
-            conn.disconnect()
-            if (code in 300..399 && !loc.isNullOrBlank()) loc else null
+            val page = SONG_PAGE + id
+            val url = PARSE_API + "?url=" + URLEncoder.encode(page, "UTF-8") +
+                "&level=" + LEVEL + "&type=json"
+            val json = JSONObject(httpGet(url))
+            val status = json.optInt("status", -1)
+            val playUrl = json.optString("url", "")
+            if (status == 200 && playUrl.isNotBlank()) {
+                synchronized(urlCache) { urlCache[id] = playUrl }
+                playUrl
+            } else {
+                lastError = json.optString("msg", "解析失败（status=$status）")
+                null
+            }
         } catch (e: Exception) {
+            lastError = e.message ?: "未知错误"
             null
         }
+    }
+
+    private fun joinArtists(arr: JSONArray?): String {
+        if (arr == null) return ""
+        val names = ArrayList<String>(arr.length())
+        for (i in 0 until arr.length()) {
+            val name = arr.optJSONObject(i)?.optString("name", "").orEmpty()
+            if (name.isNotBlank()) names.add(name)
+        }
+        return names.joinToString(" / ")
     }
 
     fun formatDuration(ms: Long): String {
@@ -177,11 +199,14 @@ object NeteaseApi {
     private fun httpGet(url: String): String {
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.requestMethod = "GET"
-        conn.connectTimeout = 10000
-        conn.readTimeout = 15000
+        conn.connectTimeout = 15000
+        conn.readTimeout = 20000
         conn.setRequestProperty("User-Agent", UA)
+        conn.setRequestProperty("Referer", REFERER)
         return try {
-            conn.inputStream.bufferedReader().use { it.readText() }
+            val code = conn.responseCode
+            val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+            stream?.bufferedReader()?.use { it.readText() }.orEmpty()
         } finally {
             conn.disconnect()
         }
