@@ -3,7 +3,6 @@ package com.ncmdump.app
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -52,8 +51,6 @@ class ShortVideoPlayerActivity : BaseActivity() {
         playerView = findViewById(R.id.playerView)
         progressBar = findViewById(R.id.progressBar)
         tvLoadingHint = findViewById(R.id.tvLoadingHint)
-        findViewById<Button>(R.id.btnShortSave).setOnClickListener { save() }
-        findViewById<Button>(R.id.btnShortBack).setOnClickListener { finish() }
 
         if (videoUrl.isEmpty()) {
             Toast.makeText(this, "无效的视频地址", Toast.LENGTH_SHORT).show()
@@ -175,14 +172,6 @@ class ShortVideoPlayerActivity : BaseActivity() {
     private fun hideLoading() {
         progressBar.visibility = ProgressBar.GONE
         tvLoadingHint.visibility = TextView.GONE
-    }
-
-    private fun save() {
-        val safeTitle = title.ifBlank { "shortvideo_${System.currentTimeMillis()}" }
-            .replace(Regex("[\\\\/:*?\"<>|]"), "_").take(60)
-        val name = "$safeTitle.mp4"
-        DownloadHelper.download(this, videoUrl, OutputDir.file(this, name), referer)
-        Toast.makeText(this, "已开始下载：$name", Toast.LENGTH_SHORT).show()
     }
 
     private fun releasePlayer() {

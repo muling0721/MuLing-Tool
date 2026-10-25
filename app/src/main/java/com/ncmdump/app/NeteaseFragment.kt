@@ -300,7 +300,9 @@ class NeteaseFragment : Fragment() {
                     return@runOnUiThread
                 }
                 val fileName = NeteaseApi.fileNameFor(song, ".mp3")
-                DownloadHelper.download(ctx, direct, OutputDir.file(ctx, fileName), "https://music.163.com/")
+                DownloadHelper.download(
+                    ctx, direct, OutputDir.file(ctx, fileName), "https://music.163.com/", song.name
+                )
                 toast("已开始下载：$fileName")
             }
         }

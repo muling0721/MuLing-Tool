@@ -144,7 +144,8 @@ class VideoFragment : Fragment() {
                     requireContext(),
                     playUrl.videoUrl,
                     OutputDir.file(requireContext(), name),
-                    "https://www.bilibili.com/"
+                    "https://www.bilibili.com/",
+                    info.title
                 )
                 tvBiliStatus.text = "已开始下载：$name"
             }

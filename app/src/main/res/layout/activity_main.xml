@@ -92,6 +92,15 @@
             </LinearLayout>
 
             <ImageButton
+                android:id="@+id/glDownload"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_download"
+                android:contentDescription="下载"
+                app:tint="?attr/colorOnSurfaceVariant" />
+
+            <ImageButton
                 android:id="@+id/glPlayPause"
                 android:layout_width="44dp"
                 android:layout_height="44dp"

@@ -142,7 +142,8 @@ class ShortVideoFragment : Fragment() {
             requireContext(),
             url,
             OutputDir.file(requireContext(), name),
-            ShortVideoApi.refererFor(result.platform)
+            ShortVideoApi.refererFor(result.platform),
+            result.title
         )
         toast("已开始下载：$name")
     }
@@ -152,7 +153,9 @@ class ShortVideoFragment : Fragment() {
         val stamp = System.currentTimeMillis()
         result.images.forEachIndexed { index, img ->
             val name = "${result.platform.label}_${stamp}_$index.jpg"
-            DownloadHelper.download(requireContext(), img, OutputDir.file(requireContext(), name))
+            DownloadHelper.download(
+                requireContext(), img, OutputDir.file(requireContext(), name), title = name
+            )
         }
         toast("已开始下载 ${result.images.size} 张图片")
     }

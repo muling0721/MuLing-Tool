@@ -1,9 +1,11 @@
 package com.ncmdump.app
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.SharedPreferences
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -58,6 +60,9 @@ class MainActivity : BaseActivity() {
         if (uris.isNotEmpty()) audioFragment.onFilesSelected(uris)
     }
 
+    private val notifPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
     private val playerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) = updateGlobalPlayer()
         override fun onPlaybackStateChanged(playbackState: Int) = updateGlobalPlayer()
@@ -89,6 +94,7 @@ class MainActivity : BaseActivity() {
             if (c.isPlaying) c.pause() else c.play()
             updateGlobalPlayer()
         }
+        findViewById<View>(R.id.glDownload).setOnClickListener { downloadCurrentSong() }
         findViewById<View>(R.id.glClose).setOnClickListener {
             controller?.apply {
                 stop()
@@ -146,6 +152,10 @@ class MainActivity : BaseActivity() {
 
         applyCustomBackground()
         bottomNav.post { positionGlobalPlayer() }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            notifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
 
         if (prefs.getBoolean("auto_update", true)) {
             UpdateChecker.checkUpdate(this, showNoUpdate = false)
@@ -219,6 +229,43 @@ class MainActivity : BaseActivity() {
         glArtist.text = item.mediaMetadata.artist?.toString().orEmpty()
         glPlayPause.setImageResource(if (c.isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
         loadGlobalCover(item.mediaMetadata.artworkUri?.toString().orEmpty())
+    }
+
+    private fun downloadCurrentSong() {
+        val c = controller ?: return
+        val item = c.currentMediaItem ?: return
+        if (item.mediaId.isBlank()) return
+        val md = item.mediaMetadata
+        val song = NeteaseApi.Song(
+            id = item.mediaId,
+            name = md.title?.toString().orEmpty(),
+            artist = md.artist?.toString().orEmpty(),
+            album = "",
+            cover = md.artworkUri?.toString().orEmpty(),
+            durationMs = 0L
+        )
+        Toast.makeText(this, "正在解析下载地址…", Toast.LENGTH_SHORT).show()
+        thread {
+            val direct = NeteaseApi.resolveDirectUrl(song.id)
+            runOnUiThread {
+                if (direct.isNullOrBlank()) {
+                    Toast.makeText(this, "下载失败：${NeteaseApi.lastError}", Toast.LENGTH_LONG).show()
+                    return@runOnUiThread
+                }
+                val name = NeteaseApi.fileNameFor(song, ".mp3")
+                DownloadHelper.download(
+                    this,
+                    direct,
+                    OutputDir.file(this, name),
+                    "https://music.163.com/",
+                    song.name
+                )
+            }
+            val lyric = NeteaseApi.fetchLyric(song.id)
+            if (lyric != null && !lyric.isEmpty) {
+                NeteaseApi.saveLyric(this, song, lyric.merged())
+            }
+        }
     }
 
     private fun loadGlobalCover(url: String) {
