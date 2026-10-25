@@ -12,9 +12,9 @@ import java.net.URLEncoder
 /**
  * 网易云歌曲解析
  *
- * - 搜索：网易云官方 cloudsearch 接口
- * - 播放/下载：羽棠小屋 Song_V1 接口（按歌曲页面链接解析出音频直链）
- * - 歌词：网易云官方歌词接口
+ * - 搜索：官方搜索接口
+ * - 播放/下载：解析接口（按歌曲页面链接获取音频直链）
+ * - 歌词：官方歌词接口
  */
 object NeteaseApi {
 
@@ -22,7 +22,9 @@ object NeteaseApi {
     private const val LYRIC_API = "https://music.163.com/api/song/lyric?id="
     private const val PARSE_API = "https://api.yutangxiaowu.cn/api/music/Song_V1"
     private const val SONG_PAGE = "https://music.163.com/song?id="
-    private const val LEVEL = "standard"
+    /** 当前音质：standard / lossless / hires / sky / jyeffect / jymaster */
+    @Volatile
+    var level: String = "standard"
     private const val REFERER = "https://music.163.com/"
     private const val UA =
         "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36"
@@ -80,16 +82,18 @@ object NeteaseApi {
      * 解析接口按歌曲页面链接工作，成功时返回 url 字段。
      */
     fun resolveDirectUrl(id: String): String? {
-        synchronized(urlCache) { urlCache[id]?.let { return it } }
+        val lv = level
+        val key = "$id:$lv"
+        synchronized(urlCache) { urlCache[key]?.let { return it } }
         return try {
             val page = SONG_PAGE + id
             val url = PARSE_API + "?url=" + URLEncoder.encode(page, "UTF-8") +
-                "&level=" + LEVEL + "&type=json"
+                "&level=" + lv + "&type=json"
             val json = JSONObject(httpGet(url))
             val status = json.optInt("status", -1)
             val playUrl = json.optString("url", "")
             if (status == 200 && playUrl.isNotBlank()) {
-                synchronized(urlCache) { urlCache[id] = playUrl }
+                synchronized(urlCache) { urlCache[key] = playUrl }
                 playUrl
             } else {
                 lastError = json.optString("msg", "解析失败（status=$status）")

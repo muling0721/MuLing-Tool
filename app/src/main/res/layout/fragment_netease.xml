@@ -56,6 +56,22 @@
                             android:textSize="15sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MuLing.TextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="音质"
+                        app:endIconMode="dropdown_menu"
+                        android:layout_marginBottom="14dp">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/etQuality"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:textSize="15sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSearch"
                         style="@style/Widget.MuLing.Button"

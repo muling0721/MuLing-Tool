@@ -33,6 +33,7 @@ import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import java.io.File
@@ -57,6 +58,7 @@ class NeteaseFragment : Fragment() {
     private lateinit var btnLyric: ImageButton
     private lateinit var btnDownload: ImageButton
     private lateinit var btnClose: ImageButton
+    private lateinit var etQuality: MaterialAutoCompleteTextView
 
     private lateinit var adapter: SongAdapter
     private var controllerFuture: ListenableFuture<MediaController>? = null
@@ -65,6 +67,9 @@ class NeteaseFragment : Fragment() {
     private var pendingSong: NeteaseApi.Song? = null
     private var searchToken = 0
     private var playToken = 0
+
+    private val qualityLabels = arrayOf("标准音质", "无损音质", "Hi-Res音质", "沉浸环绕声", "高清环绕声", "超清母带")
+    private val qualityValues = arrayOf("standard", "lossless", "hires", "sky", "jyeffect", "jymaster")
 
     private val notifPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -91,6 +96,7 @@ class NeteaseFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         etKeyword = view.findViewById(R.id.etKeyword)
+        etQuality = view.findViewById(R.id.etQuality)
         btnSearch = view.findViewById(R.id.btnSearch)
         tvStatus = view.findViewById(R.id.tvNeteaseStatus)
         rvSongs = view.findViewById(R.id.rvSongs)
@@ -119,6 +125,7 @@ class NeteaseFragment : Fragment() {
         btnLyric.setOnClickListener { currentSong?.let { downloadLyric(it) } }
         btnDownload.setOnClickListener { currentSong?.let { download(it) } }
         btnClose.setOnClickListener { closePlayer() }
+        setupQuality()
     }
 
     override fun onStart() {
@@ -184,6 +191,19 @@ class NeteaseFragment : Fragment() {
                     tvStatus.text = "共 ${list.size} 首 · 点击试听，长按查看更多"
                 }
             }
+        }
+    }
+
+    private fun setupQuality() {
+        etQuality.setSimpleItems(qualityLabels)
+        val prefs = requireContext().getSharedPreferences("ncmdump", Context.MODE_PRIVATE)
+        val saved = prefs.getString("netease_quality", "standard") ?: "standard"
+        val index = qualityValues.indexOf(saved).coerceAtLeast(0)
+        etQuality.setText(qualityLabels[index], false)
+        NeteaseApi.level = qualityValues[index]
+        etQuality.setOnItemClickListener { _, _, position, _ ->
+            NeteaseApi.level = qualityValues[position]
+            prefs.edit().putString("netease_quality", qualityValues[position]).apply()
         }
     }
 

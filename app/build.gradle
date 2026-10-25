@@ -9,11 +9,11 @@ android {
     ndkVersion "25.2.9519653"
 
     defaultConfig {
-        applicationId "com.ncmdump.app"
+        applicationId "com.muling"
         minSdk 24
         targetSdk 34
-        versionCode 33
-        versionName "1.14.3"
+        versionCode 34
+        versionName "1.5"
 
         externalNativeBuild {
             cmake {
@@ -38,7 +38,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix ".beta"
+        }
         release {
+            applicationIdSuffix ".tool"
             minifyEnabled false
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
