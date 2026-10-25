@@ -7,7 +7,6 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -27,12 +26,6 @@ object UpdateChecker {
     )
 
     fun checkUpdate(context: Context, showNoUpdate: Boolean = false) {
-        if (BuildConfig.DEBUG) {
-            if (showNoUpdate) {
-                Toast.makeText(context, "测试版不检查更新", Toast.LENGTH_SHORT).show()
-            }
-            return
-        }
         val activity = context as? Activity
         thread {
             try {

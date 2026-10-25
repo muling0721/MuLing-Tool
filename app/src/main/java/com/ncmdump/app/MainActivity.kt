@@ -172,7 +172,7 @@ class MainActivity : BaseActivity() {
             notifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
 
-        if (prefs.getBoolean("auto_update", true)) {
+        if (prefs.getBoolean("auto_update", !BuildConfig.DEBUG)) {
             UpdateChecker.checkUpdate(this, showNoUpdate = false)
         }
     }

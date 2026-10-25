@@ -71,18 +71,13 @@ class SettingsFragment : Fragment() {
             tvVersion.text = "版本 ${info.versionName}"
         }
 
-        switchAutoUpdate.isChecked = prefs.getBoolean("auto_update", true)
+        switchAutoUpdate.isChecked = prefs.getBoolean("auto_update", !BuildConfig.DEBUG)
         switchAutoUpdate.setOnCheckedChangeListener { _, checked ->
             prefs.edit().putBoolean("auto_update", checked).apply()
         }
 
-        if (BuildConfig.DEBUG) {
-            view.findViewById<View>(R.id.tvUpdateLabel).visibility = View.GONE
-            view.findViewById<View>(R.id.cardUpdate).visibility = View.GONE
-        } else {
-            view.findViewById<View>(R.id.btnCheckUpdate).setOnClickListener {
-                UpdateChecker.checkUpdate(requireContext(), showNoUpdate = true)
-            }
+        view.findViewById<View>(R.id.btnCheckUpdate).setOnClickListener {
+            UpdateChecker.checkUpdate(requireContext(), showNoUpdate = true)
         }
 
         view.findViewById<View>(R.id.cardThemeSettings).setOnClickListener {
