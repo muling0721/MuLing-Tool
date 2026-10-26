@@ -16,8 +16,8 @@ android {
         applicationId "com.muling"
         minSdk 24
         targetSdk 34
-        versionCode 46
-        versionName "1.7"
+        versionCode 47
+        versionName "1.19"
 
         externalNativeBuild {
             cmake {
