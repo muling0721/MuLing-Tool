@@ -86,15 +86,11 @@ jobs:
           ' CHANGELOG.md 2>/dev/null | sed '/./,$!d' || true)"
 
           # 上一个版本标签
-          PREV="$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || true)"
+          PREV="$(git describe --tags --match 'v[0-9]*' --abbrev=0 "${TAG}^" 2>/dev/null || true)"
+          if [ "$PREV" = "$TAG" ]; then PREV=""; fi
 
           # 2) CHANGELOG 没有该版本时，回退为「上一标签 → 当前标签」的提交记录
           if [ -z "$(printf '%s' "$BODY" | tr -d '[:space:]')" ]; then
-            if [ -n "$PREV" ]; then
-              BODY="$(git log --no-merges --pretty='- %s' "$PREV..$TAG")"
-            else
-              BODY="$(git log --no-merges --pretty='- %s' "$TAG")"
-            fi
           fi
 
           {
@@ -102,9 +98,6 @@ jobs:
             echo
             echo "$BODY"
             echo
-            if [ -n "$PREV" ]; then
-              echo "**完整对比**：https://github.com/${GITHUB_REPOSITORY}/compare/${PREV}...${TAG}"
-            fi
             echo "**APK**：\`MuLing-Tool-${TAG}.apk\`"
           } > release_notes.md
 
