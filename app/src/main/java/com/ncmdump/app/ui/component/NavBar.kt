@@ -1,17 +1,12 @@
 package com.ncmdump.app.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,153 +29,18 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.ncmdump.app.ui.theme.LocalCardAlpha
-import com.ncmdump.app.ui.theme.LocalIsDark
-import kotlin.math.roundToInt
 
 class NavItem(
     val label: String,
     val icon: ImageVector
 )
-
-/**
- * iOS 风格的悬浮胶囊底栏：整条是圆角药丸，选中项是一块滑过去的高亮。
- * 纯 Compose 绘制，不做背景模糊，滚动时不掉帧。
- */
-@Composable
-fun FloatingNavBar(
-    items: List<NavItem>,
-    selectedIndex: Int,
-    onSelect: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val scheme = MaterialTheme.colorScheme
-    val dark = LocalIsDark.current
-    val density = LocalDensity.current
-    val shape = RoundedCornerShape(50)
-
-    var barSize by remember { mutableStateOf(IntSize.Zero) }
-
-    val sidePadPx = with(density) { 6.dp.toPx() }
-    val gapPx = with(density) { 4.dp.toPx() }
-    val itemWidthPx = if (barSize.width > 0 && items.isNotEmpty()) {
-        ((barSize.width - sidePadPx * 2 - gapPx * (items.size - 1)) / items.size).coerceAtLeast(0f)
-    } else {
-        0f
-    }
-    val indicatorX by animateFloatAsState(
-        targetValue = sidePadPx + selectedIndex * (itemWidthPx + gapPx),
-        animationSpec = spring(dampingRatio = 0.78f, stiffness = 420f),
-        label = "indicatorX"
-    )
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(62.dp)
-            .onSizeChanged { barSize = it }
-            .shadow(
-                elevation = 10.dp,
-                shape = shape,
-                ambientColor = Color.Black.copy(alpha = 0.18f),
-                spotColor = Color.Black.copy(alpha = 0.30f)
-            )
-            .clip(shape)
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        scheme.surfaceContainerHigh.copy(alpha = 0.97f),
-                        scheme.surfaceContainer.copy(alpha = 0.97f)
-                    )
-                )
-            )
-            .border(
-                width = 0.8.dp,
-                color = if (dark) Color.White.copy(alpha = 0.10f) else Color.White.copy(alpha = 0.85f),
-                shape = shape
-            )
-    ) {
-        if (itemWidthPx > 0f) {
-            Box(
-                modifier = Modifier
-                    .offset {
-                        IntOffset(
-                            x = indicatorX.roundToInt(),
-                            y = with(density) { 7.dp.toPx() }.roundToInt()
-                        )
-                    }
-                    .size(width = with(density) { itemWidthPx.toDp() }, height = 48.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(scheme.primary.copy(alpha = if (dark) 0.22f else 0.14f))
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .matchParentSize()
-                .padding(horizontal = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            items.forEachIndexed { index, item ->
-                val selected = index == selectedIndex
-                val iconScale by animateFloatAsState(
-                    targetValue = if (selected) 1f else 0.9f,
-                    animationSpec = spring(dampingRatio = 0.6f, stiffness = 520f),
-                    label = "iconScale"
-                )
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(50))
-                        .clickable { onSelect(index) },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.label,
-                        tint = if (selected) scheme.primary else scheme.onSurfaceVariant,
-                        modifier = Modifier.size(21.dp * iconScale)
-                    )
-                    AnimatedVisibility(
-                        visible = selected,
-                        enter = fadeIn() + expandHorizontally(expandFrom = Alignment.Start),
-                        exit = fadeOut() + shrinkHorizontally(shrinkTowards = Alignment.Start)
-                    ) {
-                        Row {
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = item.label,
-                                style = MaterialTheme.typography.labelLarge,
-                                color = scheme.primary,
-                                maxLines = 1
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 data class NowPlayingInfo(
     val id: String,

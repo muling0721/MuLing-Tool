@@ -28,6 +28,8 @@ import androidx.compose.material.icons.twotone.MusicNote
 import androidx.compose.material.icons.twotone.Settings
 import androidx.compose.material.icons.twotone.VideoLibrary
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,6 +55,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -61,7 +64,8 @@ import com.ncmdump.app.PlayerActivity
 import com.ncmdump.app.ShortVideoPlayerActivity
 import com.ncmdump.app.UpdateChecker
 import com.ncmdump.app.ui.component.DownloadBanner
-import com.ncmdump.app.ui.component.FloatingNavBar
+import com.ncmdump.app.ui.component.FloatingBottomBar
+import com.ncmdump.app.ui.component.FloatingBottomBarItem
 import com.ncmdump.app.ui.component.MiniPlayerBar
 import com.ncmdump.app.ui.component.MuLingBackground
 import com.ncmdump.app.ui.component.NavItem
@@ -375,14 +379,42 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
                     onClose = { media.close() }
                 )
 
-                FloatingNavBar(
-                    items = bottomTabs,
-                    selectedIndex = tabIndex,
-                    onSelect = { index ->
-                        tabIndex = index
-                        stack.clear()
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    FloatingBottomBar(
+                        selectedIndex = tabIndex,
+                        onSelected = { index ->
+                            stack.clear()
+                            tabIndex = index
+                        },
+                        tabsCount = bottomTabs.size
+                    ) { activateTab ->
+                        bottomTabs.forEachIndexed { index, tab ->
+                            FloatingBottomBarItem(
+                                selected = index == tabIndex,
+                                onClick = { activateTab(index) },
+                                modifier = Modifier.defaultMinSize(minWidth = 76.dp)
+                            ) {
+                                val contentColor = LocalContentColor.current
+                                Icon(
+                                    imageVector = tab.icon,
+                                    contentDescription = tab.label,
+                                    tint = contentColor
+                                )
+                                Text(
+                                    text = tab.label,
+                                    color = contentColor,
+                                    fontSize = 11.sp,
+                                    lineHeight = 14.sp,
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
+                            }
+                        }
                     }
-                )
+                }
             }
         }
     }
