@@ -1,7 +1,7 @@
 package com.ncmdump.app.ui.component.miuix.animation
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.MutatorMutex
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -34,15 +34,15 @@ class DampedDragAnimation(
 ) {
 
     private val valueAnimationSpec =
-        SpringSpec(1f, 1000f, visibilityThreshold)
+        spring(1f, 1000f, visibilityThreshold)
     private val velocityAnimationSpec =
-        SpringSpec(0.5f, 300f, visibilityThreshold * 10f)
+        spring(0.5f, 300f, visibilityThreshold * 10f)
     private val pressProgressAnimationSpec =
-        SpringSpec(1f, 1000f, 0.001f)
+        spring(1f, 1000f, 0.001f)
     private val scaleXAnimationSpec =
-        SpringSpec(0.6f, 250f, 0.001f)
+        spring(0.6f, 250f, 0.001f)
     private val scaleYAnimationSpec =
-        SpringSpec(0.7f, 250f, 0.001f)
+        spring(0.7f, 250f, 0.001f)
 
     private val valueAnimation =
         Animatable(initialValue, visibilityThreshold)

@@ -55,7 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -81,7 +81,10 @@ import com.ncmdump.app.ui.screen.SettingsScreen
 import com.ncmdump.app.ui.screen.ThemeScreen
 import com.ncmdump.app.ui.screen.VideoScreen
 import com.ncmdump.app.ui.theme.MuLingTheme
+import com.ncmdump.app.ui.util.LocalBlurState
 import com.ncmdump.app.ui.util.toast
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import kotlinx.coroutines.launch
 
 private enum class SubPage { Convert, Downloads, Theme }
@@ -253,9 +256,15 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
         (if (downloads.isNotEmpty()) 54.dp else 0.dp)
     val subBottomSpace = navInset + 24.dp
 
+    val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    val backdrop = rememberLayerBackdrop()
+    val contentModifier = if (canBlur) Modifier.layerBackdrop(backdrop) else Modifier
+
+    CompositionLocalProvider(LocalBlurState provides if (canBlur) backdrop else null) {
     MuLingBackground {
         AnimatedContent(
             targetState = route,
+            modifier = contentModifier,
             transitionSpec = {
                 val forward = targetState.order >= initialState.order
                 val direction = if (forward) 1 else -1
@@ -387,6 +396,7 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
                     contentAlignment = Alignment.Center
                 ) {
                     FloatingBottomBar(
+                        isBlurEnabled = canBlur,
                         selectedIndex = tabIndex,
                         onSelected = { index ->
                             stack.clear()
@@ -420,6 +430,7 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
                 }
             }
         }
+    }
     }
 
     val release = updateRelease

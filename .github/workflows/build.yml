@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - name: Install Android SDK packages
         run: |
@@ -37,7 +37,7 @@ jobs:
           echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
           echo "$(dirname "$SDKMGR")" >> "$GITHUB_PATH"
           yes | "$SDKMGR" --licenses > /dev/null 2>&1 || true
-          "$SDKMGR" --install "platforms;android-34" "build-tools;34.0.0" "ndk;25.2.9519653" "cmake;3.22.1"
+          "$SDKMGR" --install "platforms;android-37" "build-tools;36.1.0" "ndk;30.0.16248370" "cmake;3.22.1"
 
       - name: Decode signing keystore
         env:
@@ -51,10 +51,10 @@ jobs:
           printf '%s' "$KEYSTORE_BASE64" | base64 -d > release.jks
           ls -l release.jks
 
-      - name: Set up Gradle 8.2
+      - name: Set up Gradle 9.8
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.2'
+          gradle-version: '9.8'
 
       - name: Build debug APK
         env:

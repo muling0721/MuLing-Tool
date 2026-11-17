@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.ncmdump.app.FileUtils
 import com.ncmdump.app.LyricFetcher
 import com.ncmdump.app.MetadataWriter
