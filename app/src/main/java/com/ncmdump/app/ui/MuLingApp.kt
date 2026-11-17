@@ -227,6 +227,7 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
         }
         if (tabIndex != 0) {
             tabIndex = 0
+            scope.launch { pagerState.animateScrollToPage(0) }
             return@BackHandler
         }
         val now = System.currentTimeMillis()
@@ -243,14 +244,7 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
 
     val pagerState = rememberPagerState(initialPage = tabIndex) { bottomTabs.size }
 
-    // 点底栏 -> 滑到对应页
-    LaunchedEffect(tabIndex) {
-        if (!pagerState.isScrollInProgress && pagerState.currentPage != tabIndex) {
-            pagerState.animateScrollToPage(tabIndex)
-        }
-    }
-
-    // 手滑 -> 同步选中项
+    // 手滑 -> 同步底栏高亮（只读，不反向驱动 pager，否则会和 fling 打架）
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { page ->
             if (page != tabIndex) tabIndex = page
@@ -277,7 +271,8 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
-            userScrollEnabled = stack.isEmpty()
+            userScrollEnabled = stack.isEmpty(),
+            beyondViewportPageCount = 1
         ) { page ->
             when (page) {
                 0 -> HomeScreen(
@@ -416,6 +411,7 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
                         onSelected = { index ->
                             stack.clear()
                             tabIndex = index
+                            scope.launch { pagerState.animateScrollToPage(index) }
                         },
                         tabsCount = bottomTabs.size
                     ) { activateTab ->
