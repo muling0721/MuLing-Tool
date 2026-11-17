@@ -38,6 +38,10 @@ class AppState(context: Context) {
     var background by mutableStateOf(prefs.getString(KEY_BACKGROUND, "").orEmpty())
         private set
 
+    /** 底栏液态玻璃（关掉以后底栏是纯色，省 GPU） */
+    var glassEnabled by mutableStateOf(prefs.getBoolean(KEY_GLASS, true))
+        private set
+
     var blurEnabled by mutableStateOf(prefs.getBoolean(KEY_BLUR, false))
         private set
 
@@ -87,6 +91,11 @@ class AppState(context: Context) {
         }
     }
 
+    fun updateGlassEnabled(enabled: Boolean) {
+        glassEnabled = enabled
+        prefs.edit().putBoolean(KEY_GLASS, enabled).apply()
+    }
+
     fun updateBlurEnabled(enabled: Boolean) {
         blurEnabled = enabled
         prefs.edit().putBoolean(KEY_BLUR, enabled).apply()
@@ -114,6 +123,7 @@ class AppState(context: Context) {
         const val KEY_SEED_LEGACY = "theme_seed_color"
         const val KEY_CARD_OPACITY = "card_opacity"
         const val KEY_BACKGROUND = "custom_background"
+        const val KEY_GLASS = "glass_enabled"
         const val KEY_BLUR = "enable_blur"
         const val KEY_BLUR_STRENGTH = "blur_strength"
         const val KEY_AUTO_UPDATE = "auto_update"

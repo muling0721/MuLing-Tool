@@ -261,12 +261,14 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
 
     val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
         runCatching { top.yukonga.miuix.kmp.shader.isRenderEffectSupported() }.getOrDefault(false)
+    // 设置里可以关掉，关掉就走底栏的纯色分支
+    val glassEnabled = canBlur && appState.glassEnabled
     val backdrop = rememberLayerBackdrop()
 
-    CompositionLocalProvider(LocalBlurState provides if (canBlur) backdrop else null) {
+    CompositionLocalProvider(LocalBlurState provides if (glassEnabled) backdrop else null) {
     // 只把背景层录进 backdrop，滚动内容不进采样层（和 BakaSU 的读取层次一致，也不会每帧重录列表）
     MuLingBackground(
-        backgroundModifier = if (canBlur) Modifier.layerBackdrop(backdrop) else Modifier
+        backgroundModifier = if (glassEnabled) Modifier.layerBackdrop(backdrop) else Modifier
     ) {
         // 标签页：可左右滑动切换
         HorizontalPager(
@@ -407,7 +409,7 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
                     contentAlignment = Alignment.Center
                 ) {
                     FloatingBottomBar(
-                        isBlurEnabled = canBlur,
+                        isBlurEnabled = glassEnabled,
                         selectedIndex = tabIndex,
                         onSelected = { index ->
                             stack.clear()

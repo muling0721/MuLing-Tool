@@ -370,6 +370,20 @@ fun ThemeScreen(
             }
         }
 
+        item { SectionHeader(title = "底栏") }
+        item {
+            MuLingCard {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    SwitchRow(
+                        title = "液态玻璃底栏",
+                        subtitle = "关闭后底栏使用纯色，滑动更省电（Android 13+ 才有效果）",
+                        checked = appState.glassEnabled,
+                        onCheckedChange = { appState.updateGlassEnabled(it) }
+                    )
+                }
+            }
+        }
+
         item { SectionHeader(title = "主题色") }
         item {
             MuLingCard {
