@@ -259,13 +259,14 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
     val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
         runCatching { top.yukonga.miuix.kmp.shader.isRenderEffectSupported() }.getOrDefault(false)
     val backdrop = rememberLayerBackdrop()
-    val contentModifier = if (canBlur) Modifier.layerBackdrop(backdrop) else Modifier
 
     CompositionLocalProvider(LocalBlurState provides if (canBlur) backdrop else null) {
-    MuLingBackground {
+    // 只把背景层录进 backdrop，滚动内容不进采样层（和 BakaSU 的读取层次一致，也不会每帧重录列表）
+    MuLingBackground(
+        backgroundModifier = if (canBlur) Modifier.layerBackdrop(backdrop) else Modifier
+    ) {
         AnimatedContent(
             targetState = route,
-            modifier = contentModifier,
             transitionSpec = {
                 val forward = targetState.order >= initialState.order
                 val direction = if (forward) 1 else -1

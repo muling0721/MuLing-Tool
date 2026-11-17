@@ -26,12 +26,18 @@ import androidx.compose.material3.MaterialTheme
  * 对应旧版 BackgroundHelper 的功能。
  */
 @Composable
-fun MuLingBackground(content: @Composable BoxScope.() -> Unit) {
+fun MuLingBackground(
+    modifier: Modifier = Modifier,
+    backgroundModifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit
+) {
     val state = LocalAppState.current
     val scheme = MaterialTheme.colorScheme
     val dark = LocalIsDark.current
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
+    // 背景层单独一层，玻璃采样只取这一层（和 BakaSU 一样读背景，不读滚动内容）
+    Box(modifier = Modifier.fillMaxSize().then(backgroundModifier)) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -80,7 +86,8 @@ fun MuLingBackground(content: @Composable BoxScope.() -> Unit) {
                     )
             )
         }
+    }
 
-        content()
+    content()
     }
 }
