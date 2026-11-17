@@ -1,14 +1,13 @@
 package com.ncmdump.app
 
 import android.app.Application
-import androidx.appcompat.app.AppCompatDelegate
 
 class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 
+        // 测试版默认关闭自动更新（避免测试包反复提示升级）
         val prefs = getSharedPreferences("ncmdump", MODE_PRIVATE)
         if (BuildConfig.DEBUG && !prefs.getBoolean("debug_auto_update_defaulted", false)) {
             prefs.edit()

@@ -32,9 +32,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ThemeActivity"
-            android:exported="false" />
-        <activity
             android:name=".PlayerActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize|keyboardHidden"
@@ -45,6 +42,17 @@
             android:exported="false"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:screenOrientation="sensor" />
+
+        <!-- 打开下载记录中的本地文件 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <!-- 媒体播放会话（通知栏 / 锁屏可控） -->
         <service
