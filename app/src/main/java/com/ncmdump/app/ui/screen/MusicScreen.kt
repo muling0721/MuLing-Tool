@@ -51,7 +51,6 @@ import com.ncmdump.app.ui.LocalAppState
 import com.ncmdump.app.ui.MediaSessionState
 import com.ncmdump.app.ui.component.CoverImage
 import com.ncmdump.app.ui.component.DropdownField
-import com.ncmdump.app.ui.component.EmptyState
 import com.ncmdump.app.ui.component.MuLingCard
 import com.ncmdump.app.ui.component.MuLingTextField
 import com.ncmdump.app.ui.component.PrimaryButton
@@ -247,16 +246,6 @@ fun MusicScreen(
                             modifier = Modifier.size(22.dp)
                         )
                     }
-                }
-            }
-        } else if (!searching) {
-            item {
-                MuLingCard {
-                    EmptyState(
-                        icon = Icons.TwoTone.MusicNote,
-                        title = "搜索并试听",
-                        subtitle = "支持标准 / 无损 / Hi-Res 等音质"
-                    )
                 }
             }
         }
