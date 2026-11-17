@@ -1,6 +1,6 @@
 package com.ncmdump.app.ui.component
 
-import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -11,12 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.ncmdump.app.ui.LocalAppState
 import com.ncmdump.app.ui.theme.LocalIsDark
 import androidx.compose.material3.MaterialTheme
@@ -68,16 +66,16 @@ fun MuLingBackground(
         )
 
         if (state.background.isNotBlank()) {
-            val uri = remember(state.background) { Uri.parse(state.background) }
-            val radius = (state.blurStrength / 100f * 40f).dp
-            AsyncImage(
-                model = uri,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(if (state.blurEnabled) Modifier.blur(radius) else Modifier)
-            )
+            // 处理好的图（含模糊）走磁盘缓存，启动时直接读，不再重新解码原图
+            val wallpaper = rememberWallpaperBackground()
+            if (wallpaper != null) {
+                Image(
+                    bitmap = wallpaper,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
