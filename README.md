@@ -6,10 +6,11 @@
 ![Release](https://img.shields.io/github/v/release/muling0721/MuLing-Tool?label=release&color=blue)
 ![Platform](https://img.shields.io/badge/platform-Android%206.0%2B-3ddc84?logo=android&logoColor=white)
 ![UI](https://img.shields.io/badge/UI-Jetpack%20Compose-4285f4)
+![Version](https://img.shields.io/badge/version-2.0-ff8fc7)
 
 基于 ncmdump C++ 核心的 Android 图形化解密工具，附带音频处理、哔哩哔哩 / 短视频解析与网易云音乐搜索下载。
-v1.20 起界面使用 **Jetpack Compose** 全量重写，视觉风格参考 HyperOS / Miuix：
-大圆角分组卡片、悬浮胶囊导航、可折叠大标题、深浅色与自定义背景。
+界面使用 **Jetpack Compose** 全量重写：大圆角分组卡片、折叠大标题、深浅色与自定义背景；
+底栏为 BakaSU 的悬浮胶囊（可拖动、边缘折射、重力感应高光），Android 13+ 走真实背景采样。
 
 ## 功能
 

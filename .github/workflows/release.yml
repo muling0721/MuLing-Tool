@@ -72,6 +72,8 @@ jobs:
           set -e
           TAG="${GITHUB_REF_NAME}"
           APK="$(ls app/build/outputs/apk/release/*.apk | head -1)"
+          ASSET="MuLing-Tool-${TAG}.apk"
+          cp "$APK" "$ASSET"
 
           # 1) 优先从 CHANGELOG.md 截取该版本的条目作为发布说明
           BODY="$(awk -v tag="$TAG" '
@@ -101,8 +103,8 @@ jobs:
           echo "-------------------------"
 
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "$APK" --clobber
+            gh release upload "$TAG" "$ASSET" --clobber
             gh release edit "$TAG" --notes-file release_notes.md
           else
-            gh release create "$TAG" "$APK" --title "$TAG" --notes-file release_notes.md
+            gh release create "$TAG" "$ASSET" --title "$TAG" --notes-file release_notes.md
           fi
