@@ -16,6 +16,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
@@ -51,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -85,21 +88,10 @@ import com.ncmdump.app.ui.util.LocalBlurState
 import com.ncmdump.app.ui.util.toast
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 private enum class SubPage { Convert, Downloads, Theme }
-
-private sealed interface Route {
-    data class Tab(val index: Int) : Route
-    data class Sub(val page: SubPage) : Route
-
-    /** 用于判断切换方向（子页面总在标签页之后） */
-    val order: Int
-        get() = when (this) {
-            is Tab -> index
-            is Sub -> 10 + page.ordinal
-        }
-}
 
 private val bottomTabs = listOf(
     NavItem("音频", Icons.TwoTone.GraphicEq),
@@ -248,7 +240,22 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
     val navInset = with(density) { WindowInsets.navigationBars.getBottom(this).toDp() }
     val statusInset = with(density) { WindowInsets.statusBars.getTop(this).toDp() }
 
-    val route: Route = stack.lastOrNull()?.let { Route.Sub(it) } ?: Route.Tab(tabIndex)
+    val pagerState = rememberPagerState(initialPage = tabIndex) { bottomTabs.size }
+
+    // 点底栏 -> 滑到对应页
+    LaunchedEffect(tabIndex) {
+        if (!pagerState.isScrollInProgress && pagerState.currentPage != tabIndex) {
+            pagerState.animateScrollToPage(tabIndex)
+        }
+    }
+
+    // 手滑 -> 同步选中项
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { page ->
+            if (page != tabIndex) tabIndex = page
+        }
+    }
+
     val nowPlaying = media.info
 
     val tabBottomSpace = navInset + 64.dp + 24.dp +
@@ -265,100 +272,105 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
     MuLingBackground(
         backgroundModifier = if (canBlur) Modifier.layerBackdrop(backdrop) else Modifier
     ) {
+        // 标签页：可左右滑动切换
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize(),
+            userScrollEnabled = stack.isEmpty()
+        ) { page ->
+            when (page) {
+                0 -> HomeScreen(
+                    state = homeState,
+                    scope = scope,
+                    topPadding = statusInset,
+                    bottomPadding = tabBottomSpace,
+                    onOpenConvert = { stack.add(SubPage.Convert) },
+                    onOpenDownloads = { stack.add(SubPage.Downloads) }
+                )
+
+                1 -> VideoScreen(
+                    topPadding = statusInset,
+                    bottomPadding = tabBottomSpace,
+                    onPlayBili = { bvid, cid, title ->
+                        runCatching {
+                            context.startActivity(
+                                Intent(context, PlayerActivity::class.java).apply {
+                                    putExtra("bvid", bvid)
+                                    putExtra("cid", cid)
+                                    putExtra("video_title", title)
+                                }
+                            )
+                        }
+                    },
+                    onPlayShort = { url, referer, title ->
+                        runCatching {
+                            context.startActivity(
+                                Intent(context, ShortVideoPlayerActivity::class.java).apply {
+                                    putExtra("video_url", url)
+                                    putExtra("referer", referer)
+                                    putExtra("video_title", title)
+                                }
+                            )
+                        }
+                    }
+                )
+
+                2 -> MusicScreen(
+                    topPadding = statusInset,
+                    bottomPadding = tabBottomSpace,
+                    media = media,
+                    state = musicState
+                )
+
+                else -> SettingsScreen(
+                    topPadding = statusInset,
+                    bottomPadding = tabBottomSpace,
+                    onOpenTheme = { stack.add(SubPage.Theme) },
+                    onOpenDownloads = { stack.add(SubPage.Downloads) }
+                )
+            }
+        }
+
+        // 子页面覆盖层
         AnimatedContent(
-            targetState = route,
+            targetState = stack.lastOrNull(),
             transitionSpec = {
-                val forward = targetState.order >= initialState.order
-                val direction = if (forward) 1 else -1
                 (
-                    slideInHorizontally(animationSpec = tween(280)) { full ->
-                        direction * full / 8
-                    } + fadeIn(animationSpec = tween(200))
+                    slideInHorizontally(animationSpec = tween(300)) { it / 3 } +
+                        fadeIn(animationSpec = tween(180))
                     ).togetherWith(
-                    slideOutHorizontally(animationSpec = tween(240)) { full ->
-                        -direction * full / 10
-                    } + fadeOut(animationSpec = tween(140))
+                    slideOutHorizontally(animationSpec = tween(260)) { it / 5 } +
+                        fadeOut(animationSpec = tween(140))
                 )
             },
-            label = "screen"
-        ) { current ->
-            val bottom = if (current is Route.Tab) tabBottomSpace else subBottomSpace
-            when (current) {
-                is Route.Sub -> when (current.page) {
-                    SubPage.Convert -> ConvertScreen(
-                        topPadding = statusInset,
-                        bottomPadding = bottom,
-                        onBack = { stack.removeAt(stack.lastIndex) }
-                    )
+            label = "subpage"
+        ) { page ->
+            if (page != null) {
+                MuLingBackground {
+                    when (page) {
+                        SubPage.Convert -> ConvertScreen(
+                            topPadding = statusInset,
+                            bottomPadding = subBottomSpace,
+                            onBack = { stack.removeAt(stack.lastIndex) }
+                        )
 
-                    SubPage.Downloads -> DownloadsScreen(
-                        topPadding = statusInset,
-                        bottomPadding = bottom,
-                        onBack = { stack.removeAt(stack.lastIndex) }
-                    )
+                        SubPage.Downloads -> DownloadsScreen(
+                            topPadding = statusInset,
+                            bottomPadding = subBottomSpace,
+                            onBack = { stack.removeAt(stack.lastIndex) }
+                        )
 
-                    SubPage.Theme -> ThemeScreen(
-                        topPadding = statusInset,
-                        bottomPadding = bottom,
-                        onBack = { stack.removeAt(stack.lastIndex) }
-                    )
-                }
-
-                is Route.Tab -> when (current.index) {
-                    0 -> HomeScreen(
-                        state = homeState,
-                        scope = scope,
-                        topPadding = statusInset,
-                        bottomPadding = bottom,
-                        onOpenConvert = { stack.add(SubPage.Convert) },
-                        onOpenDownloads = { stack.add(SubPage.Downloads) }
-                    )
-
-                    1 -> VideoScreen(
-                        topPadding = statusInset,
-                        bottomPadding = bottom,
-                        onPlayBili = { bvid, cid, title ->
-                            runCatching {
-                                context.startActivity(
-                                    Intent(context, PlayerActivity::class.java).apply {
-                                        putExtra("bvid", bvid)
-                                        putExtra("cid", cid)
-                                        putExtra("video_title", title)
-                                    }
-                                )
-                            }
-                        },
-                        onPlayShort = { url, referer, title ->
-                            runCatching {
-                                context.startActivity(
-                                    Intent(context, ShortVideoPlayerActivity::class.java).apply {
-                                        putExtra("video_url", url)
-                                        putExtra("referer", referer)
-                                        putExtra("video_title", title)
-                                    }
-                                )
-                            }
-                        }
-                    )
-
-                    2 -> MusicScreen(
-                        topPadding = statusInset,
-                        bottomPadding = bottom,
-                        media = media,
-                        state = musicState
-                    )
-
-                    else -> SettingsScreen(
-                        topPadding = statusInset,
-                        bottomPadding = bottom,
-                        onOpenTheme = { stack.add(SubPage.Theme) },
-                        onOpenDownloads = { stack.add(SubPage.Downloads) }
-                    )
+                        SubPage.Theme -> ThemeScreen(
+                            topPadding = statusInset,
+                            bottomPadding = subBottomSpace,
+                            onBack = { stack.removeAt(stack.lastIndex) }
+                        )
+                    }
                 }
             }
         }
 
-        if (route is Route.Tab) {
+        if (stack.isEmpty()) {
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
