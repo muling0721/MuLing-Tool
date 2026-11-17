@@ -2,6 +2,7 @@ package com.ncmdump.app.ui.component
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
@@ -56,7 +57,6 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.draw.shadow
 import com.ncmdump.app.ui.component.miuix.animation.DampedDragAnimation
 import kotlin.math.abs
@@ -99,7 +99,7 @@ fun FloatingBottomBar(
             if (totalWidthPx == 0f) {
                 0f
             } else {
-                val fraction = (offsetAnimation.value / totalWidthPx).fastCoerceIn(-1f, 1f)
+                val fraction = (offsetAnimation.value / totalWidthPx).coerceIn(-1f, 1f)
                 rubberBandPx * fraction.sign * EaseOut.transform(abs(fraction))
             }
         }
@@ -139,13 +139,13 @@ fun FloatingBottomBar(
                 }
                 updateValue(targetIndex.toFloat())
                 animationScope.launch {
-                    offsetAnimation.animateTo(0f, spring(1f, 300f, 0.5f))
+                    offsetAnimation.animateTo(0f, SpringSpec(dampingRatio = 1f, stiffness = 300f, visibilityThreshold = 0.5f))
                 }
             },
             onDragCancelled = {
                 updateValue(currentIndex.toFloat())
                 animationScope.launch {
-                    offsetAnimation.animateTo(0f, spring(1f, 300f, 0.5f))
+                    offsetAnimation.animateTo(0f, SpringSpec(dampingRatio = 1f, stiffness = 300f, visibilityThreshold = 0.5f))
                 }
             },
             onDrag = { _, dragAmount ->
