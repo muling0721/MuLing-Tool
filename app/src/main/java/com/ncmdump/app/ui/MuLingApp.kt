@@ -229,7 +229,7 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
         }
         if (tabIndex != 0) {
             tabIndex = 0
-            scope.launch { pagerState.animateScrollToPage(0) }
+            scope.launch { jumpToPage(pagerState, 0) }
             return@BackHandler
         }
         val now = System.currentTimeMillis()
@@ -412,7 +412,7 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
                         onSelected = { index ->
                             stack.clear()
                             tabIndex = index
-                            scope.launch { pagerState.animateScrollToPage(index) }
+                            scope.launch { jumpToPage(pagerState, index) }
                         },
                         tabsCount = bottomTabs.size
                     ) { activateTab ->
@@ -478,3 +478,12 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
         )
     }
 }
+/**
+ * 跨页跳转：相邻页滑动切换，隔两页以上直接切过去。
+ * 中间页会被逐帧合成，跳 2~3 页时会明显卡，直接切没有这个问题。
+ */
+private suspend fun jumpToPage(state: androidx.compose.foundation.pager.PagerState, index: Int) {
+    val distance = kotlin.math.abs(state.currentPage - index)
+    if (distance > 1) state.scrollToPage(index) else state.animateScrollToPage(index)
+}
+
