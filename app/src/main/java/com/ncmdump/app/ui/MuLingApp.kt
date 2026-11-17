@@ -153,6 +153,8 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
     val homeState = remember { HomeState() }
     val musicState = remember { MusicState() }
 
+    val pagerState = rememberPagerState(initialPage = tabIndex) { bottomTabs.size }
+
     val downloads = remember { mutableStateMapOf<Int, DownloadHelper.Progress>() }
     var downloadNote by remember { mutableStateOf<String?>(null) }
 
@@ -242,7 +244,6 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
     val navInset = with(density) { WindowInsets.navigationBars.getBottom(this).toDp() }
     val statusInset = with(density) { WindowInsets.statusBars.getTop(this).toDp() }
 
-    val pagerState = rememberPagerState(initialPage = tabIndex) { bottomTabs.size }
 
     // 手滑 -> 同步底栏高亮（只读，不反向驱动 pager，否则会和 fling 打架）
     LaunchedEffect(pagerState) {
