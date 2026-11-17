@@ -256,7 +256,8 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
         (if (downloads.isNotEmpty()) 54.dp else 0.dp)
     val subBottomSpace = navInset + 24.dp
 
-    val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+        runCatching { top.yukonga.miuix.kmp.shader.isRenderEffectSupported() }.getOrDefault(false)
     val backdrop = rememberLayerBackdrop()
     val contentModifier = if (canBlur) Modifier.layerBackdrop(backdrop) else Modifier
 
