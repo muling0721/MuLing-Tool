@@ -27,6 +27,13 @@ import java.util.List;
             URL urlObj = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) urlObj.openConnection();
             connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36");
+            connection.setRequestProperty("Accept", "application/json, text/plain, */*");
+            connection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8");
+            String referer = (url.indexOf("music.163.com") >= 0 || url.indexOf("/api/music/") >= 0)
+                    ? "https://music.163.com/" : "https://doc.yutangxiaowu.cn/";
+            connection.setRequestProperty("Referer", referer);
+            connection.setInstanceFollowRedirects(true);
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
 
