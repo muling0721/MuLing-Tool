@@ -49,17 +49,13 @@ jobs:
           printf '%s' "$KEYSTORE_BASE64" | base64 -d > release.jks
           ls -l release.jks
 
-      - name: Set up Gradle 9.8
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.8'
 
       - name: Build release APK
         env:
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-        run: gradle assembleRelease --stacktrace
+        run: ./gradlew assembleRelease --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
