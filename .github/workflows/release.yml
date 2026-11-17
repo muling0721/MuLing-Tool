@@ -86,8 +86,9 @@ jobs:
           PREV="$(git describe --tags --match 'v[0-9]*' --abbrev=0 "${TAG}^" 2>/dev/null || true)"
           if [ "$PREV" = "$TAG" ]; then PREV=""; fi
 
-          # 2) CHANGELOG 没有该版本时，回退为「上一标签 → 当前标签」的提交记录
+          # 2) CHANGELOG 没有该版本时，给个占位说明
           if [ -z "$(printf '%s' "$BODY" | tr -d '[:space:]')" ]; then
+            BODY="本次更新内容见提交记录。"
           fi
 
           {
