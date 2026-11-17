@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -37,7 +37,6 @@ jobs:
           echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
           echo "$(dirname "$SDKMGR")" >> "$GITHUB_PATH"
           yes | "$SDKMGR" --licenses > /dev/null 2>&1 || true
-          "$SDKMGR" --install "platforms;android-37" "build-tools;36.1.0" "ndk;30.0.16248370" "cmake;3.22.1"
 
       - name: Decode signing keystore
         env:
