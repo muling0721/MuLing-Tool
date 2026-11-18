@@ -9,6 +9,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -61,6 +62,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
@@ -154,6 +156,23 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
     val musicState = remember { MusicState() }
 
     val pagerState = rememberPagerState(initialPage = tabIndex) { bottomTabs.size }
+    val pagerAlpha = remember { Animatable(1f) }
+
+    // 相邻页滑动过去；隔页的话淡出 -> 直接切 -> 淡入，跨页滑会把中间几屏连着合成，掉帧
+    suspend fun goToPage(target: Int) {
+        val distance = kotlin.math.abs(pagerState.currentPage - target)
+        try {
+            if (distance <= 1) {
+                pagerState.animateScrollToPage(target)
+            } else {
+                pagerAlpha.animateTo(0f, tween(90))
+                pagerState.scrollToPage(target)
+                pagerAlpha.animateTo(1f, tween(140))
+            }
+        } finally {
+            if (pagerAlpha.value != 1f) pagerAlpha.animateTo(1f, tween(120))
+        }
+    }
 
     val downloads = remember { mutableStateMapOf<Int, DownloadHelper.Progress>() }
     var downloadNote by remember { mutableStateOf<String?>(null) }
@@ -229,7 +248,7 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
         }
         if (tabIndex != 0) {
             tabIndex = 0
-            scope.launch { jumpToPage(pagerState, 0) }
+            scope.launch { goToPage(0) }
             return@BackHandler
         }
         val now = System.currentTimeMillis()
@@ -273,7 +292,9 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
         // 标签页：可左右滑动切换
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { alpha = pagerAlpha.value },
             userScrollEnabled = stack.isEmpty(),
             beyondViewportPageCount = 1
         ) { page ->
@@ -414,7 +435,7 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
                         onSelected = { index ->
                             stack.clear()
                             tabIndex = index
-                            scope.launch { jumpToPage(pagerState, index) }
+                            scope.launch { goToPage(index) }
                         },
                         tabsCount = bottomTabs.size
                     ) { activateTab ->
@@ -480,12 +501,3 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
         )
     }
 }
-/**
- * 跨页跳转：相邻页滑动切换，隔两页以上直接切过去。
- * 中间页会被逐帧合成，跳 2~3 页时会明显卡，直接切没有这个问题。
- */
-private suspend fun jumpToPage(state: androidx.compose.foundation.pager.PagerState, index: Int) {
-    val distance = kotlin.math.abs(state.currentPage - index)
-    if (distance > 1) state.scrollToPage(index) else state.animateScrollToPage(index)
-}
-
