@@ -36,7 +36,7 @@ fun MuLingBackground(
     val dark = LocalIsDark.current
 
     Box(modifier = modifier.fillMaxSize()) {
-    // 背景层单独一层，玻璃采样只取这一层（和 BakaSU 一样读背景，不读滚动内容）
+    // 背景层单独一层，玻璃采样只取这一层（读背景，不读滚动内容）
     Box(modifier = Modifier.fillMaxSize().then(backgroundModifier)) {
         Box(
             modifier = Modifier

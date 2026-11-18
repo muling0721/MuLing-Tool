@@ -266,7 +266,7 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
     val backdrop = rememberLayerBackdrop()
 
     CompositionLocalProvider(LocalBlurState provides if (glassEnabled) backdrop else null) {
-    // 只把背景层录进 backdrop，滚动内容不进采样层（和 BakaSU 的读取层次一致，也不会每帧重录列表）
+    // 只把背景层录进 backdrop，滚动内容不进采样层（避免每帧重录列表）
     MuLingBackground(
         backgroundModifier = if (glassEnabled) Modifier.layerBackdrop(backdrop) else Modifier
     ) {
