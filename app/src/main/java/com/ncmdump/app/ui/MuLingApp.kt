@@ -9,7 +9,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -17,6 +17,9 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.MutatePriority
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.Arrangement
@@ -62,7 +65,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
@@ -95,6 +97,13 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 private enum class SubPage { Convert, Downloads, Theme }
+
+/** 页面吸附动画：低阻尼 + 高刚度，松手后干脆地滑到位，不拖泥带水 */
+private val PagerSnapSpec = spring<Float>(
+    dampingRatio = 0.85f,
+    stiffness = 380f,
+    visibilityThreshold = 0.5f
+)
 
 private val bottomTabs = listOf(
     NavItem("音频", Icons.TwoTone.GraphicEq),
@@ -156,21 +165,23 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
     val musicState = remember { MusicState() }
 
     val pagerState = rememberPagerState(initialPage = tabIndex) { bottomTabs.size }
-    val pagerAlpha = remember { Animatable(1f) }
 
-    // 相邻页滑动过去；隔页的话淡出 -> 直接切 -> 淡入，跨页滑会把中间几屏连着合成，掉帧
+    // 切换动画期间禁止手势，避免和自动滑动抢滚动权
+    var animating by remember { mutableStateOf(false) }
+
     suspend fun goToPage(target: Int) {
-        val distance = kotlin.math.abs(pagerState.currentPage - target)
+        if (target !in bottomTabs.indices) return
+        if (target == pagerState.currentPage && !pagerState.isScrollInProgress) return
+        animating = true
         try {
-            if (distance <= 1) {
-                pagerState.animateScrollToPage(target)
-            } else {
-                pagerAlpha.animateTo(0f, tween(90))
-                pagerState.scrollToPage(target)
-                pagerAlpha.animateTo(1f, tween(140))
-            }
+            // 先把用户手势的滚动权收回来，否则点在滑动中途会被吞掉
+            pagerState.scroll(MutatePriority.PreventUserInput) { }
+            pagerState.animateScrollToPage(
+                page = target,
+                animationSpec = PagerSnapSpec
+            )
         } finally {
-            if (pagerAlpha.value != 1f) pagerAlpha.animateTo(1f, tween(120))
+            animating = false
         }
     }
 
@@ -246,8 +257,7 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
             stack.removeAt(stack.lastIndex)
             return@BackHandler
         }
-        if (tabIndex != 0) {
-            tabIndex = 0
+        if (pagerState.currentPage != 0) {
             scope.launch { goToPage(0) }
             return@BackHandler
         }
@@ -264,9 +274,9 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
     val statusInset = with(density) { WindowInsets.statusBars.getTop(this).toDp() }
 
 
-    // 手滑 -> 同步底栏高亮（只读，不反向驱动 pager，否则会和 fling 打架）
+    // 只有页面落定后才更新 tabIndex，动画途中不动，避免和底栏自身的动画互相拉扯
     LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }.collect { page ->
+        snapshotFlow { pagerState.settledPage }.collect { page ->
             if (page != tabIndex) tabIndex = page
         }
     }
@@ -292,11 +302,13 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
         // 标签页：可左右滑动切换
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer { alpha = pagerAlpha.value },
-            userScrollEnabled = stack.isEmpty(),
-            beyondViewportPageCount = 1
+            flingBehavior = PagerDefaults.flingBehavior(
+                state = pagerState,
+                snapAnimationSpec = PagerSnapSpec
+            ),
+            modifier = Modifier.fillMaxSize(),
+            userScrollEnabled = stack.isEmpty() && !animating,
+            beyondViewportPageCount = bottomTabs.size
         ) { page ->
             when (page) {
                 0 -> HomeScreen(
@@ -391,10 +403,57 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
         }
 
         if (stack.isEmpty()) {
+            // 底栏固定贴在底部，下载提示和播放器单独一层放在它上方，
+            // 这样提示出现/消失时底栏不会跟着上下跳
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(bottom = navInset + 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                FloatingBottomBar(
+                    isBlurEnabled = glassEnabled,
+                    selectedIndex = pagerState.targetPage,
+                    onSelected = { index ->
+                        stack.clear()
+                        scope.launch { goToPage(index) }
+                    },
+                    tabsCount = bottomTabs.size
+                ) { activateTab ->
+                    bottomTabs.forEachIndexed { index, tab ->
+                        FloatingBottomBarItem(
+                            selected = index == pagerState.targetPage,
+                            onClick = { activateTab(index) },
+                            modifier = Modifier.defaultMinSize(minWidth = 76.dp)
+                        ) {
+                            val contentColor = LocalContentColor.current
+                            Icon(
+                                imageVector = tab.icon,
+                                contentDescription = tab.label,
+                                tint = contentColor
+                            )
+                            Text(
+                                text = tab.label,
+                                color = contentColor,
+                                fontSize = 11.sp,
+                                lineHeight = 14.sp,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
+                    }
+                }
+            }
+
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(start = 16.dp, end = 16.dp, bottom = navInset + 12.dp),
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = navInset + 12.dp + 64.dp + 10.dp
+                    ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 AnimatedVisibility(
@@ -424,45 +483,6 @@ private fun AppContent(appState: AppState, media: MediaSessionState) {
                     onDownload = { media.downloadCurrent(context, scope) },
                     onClose = { media.close() }
                 )
-
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    FloatingBottomBar(
-                        isBlurEnabled = glassEnabled,
-                        selectedIndex = tabIndex,
-                        onSelected = { index ->
-                            stack.clear()
-                            tabIndex = index
-                            scope.launch { goToPage(index) }
-                        },
-                        tabsCount = bottomTabs.size
-                    ) { activateTab ->
-                        bottomTabs.forEachIndexed { index, tab ->
-                            FloatingBottomBarItem(
-                                selected = index == tabIndex,
-                                onClick = { activateTab(index) },
-                                modifier = Modifier.defaultMinSize(minWidth = 76.dp)
-                            ) {
-                                val contentColor = LocalContentColor.current
-                                Icon(
-                                    imageVector = tab.icon,
-                                    contentDescription = tab.label,
-                                    tint = contentColor
-                                )
-                                Text(
-                                    text = tab.label,
-                                    color = contentColor,
-                                    fontSize = 11.sp,
-                                    lineHeight = 14.sp,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                            }
-                        }
-                    }
-                }
             }
         }
     }
